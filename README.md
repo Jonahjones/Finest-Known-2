@@ -1,194 +1,148 @@
-# FinestKnown App
+# 🏆 FinestKnown - Precious Metals E-Commerce App
 
-A StockX-inspired precious metals e-commerce mobile application built with React Native, Expo, and Supabase.
+A modern, StockX-inspired mobile application for trading precious metals with real-time pricing, auctions, and e-commerce functionality.
 
-## 🚀 Features
+## ✨ Features
 
-- **StockX-inspired UI/UX** with black, white, and green (#00D4AA) color scheme
-- **Real-time live pricing** for precious metals (gold, silver, platinum, palladium)
-- **E-commerce functionality** with cart, checkout, and orders
-- **Auction system** for rare items with bidding
-- **Content management** for articles and educational resources
-- **Authentication** and user management
-- **Responsive design** for mobile and tablet
+### 🔥 Real-Time Pricing
+- **Live metal prices** for Gold, Silver, Platinum, and Palladium
+- **Smooth scrolling ticker** at the top of the app
+- **Percentage change tracking** with accurate calculations
+- **Auto-refresh** every 2 hours with persistent storage
+- **Multiple API sources** for reliable data
 
-## 🛠️ Tech Stack
+### 🛒 E-Commerce
+- **Product catalog** with categories and filtering
+- **Shopping cart** with persistent storage
+- **Checkout system** with order management
+- **User accounts** and order history
 
-- **Framework**: React Native with Expo Router
-- **Backend**: Supabase (PostgreSQL)
-- **State Management**: React Query + Context API
-- **Styling**: Design tokens system
-- **Navigation**: Expo Router with tab navigation
-- **Real-time**: Supabase real-time subscriptions
+### 🎯 Auctions
+- **Live auction system** for precious metals
+- **Real-time bidding** with notifications
+- **Auction history** and tracking
 
-## 📱 Screens
+### 🔐 Authentication
+- **Modern sign-up/sign-in** with clean UI
+- **SSO options** (Google, Apple, Facebook, Twitter)
+- **Email/password** authentication
+- **Onboarding flow** for new users
 
-- **Home**: Live prices ticker, featured products, category grid
-- **Catalog**: Product browsing with search and filters
-- **Auctions**: Live auction listings with bidding
-- **Cart**: Shopping cart management
-- **Learn**: Educational articles and resources
+### 📱 Modern UI/UX
+- **StockX-inspired design** with dark theme
+- **Smooth animations** and transitions
+- **Responsive layout** for all screen sizes
+- **Design token system** for consistency
 
-## 🎨 Design System
+## 🚀 Tech Stack
 
-The app uses a comprehensive design token system with:
-- **Colors**: Primary black, accent green, status colors, metal-specific colors
-- **Typography**: Display, title, heading, body, caption scales
-- **Spacing**: Consistent spacing scale from xs to 6xl
-- **Components**: Reusable Button, Card, ProductCard components
+- **React Native** with Expo
+- **TypeScript** for type safety
+- **Supabase** for backend and real-time features
+- **React Query** for data fetching
+- **AsyncStorage** for local persistence
+- **Expo Router** for navigation
 
-## 🚀 Getting Started
+## 📦 Installation
 
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-- Expo CLI
-- iOS Simulator (for iOS development)
-- Android Studio (for Android development)
-
-### Installation
-
-1. **Clone the repository**
+1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
-   cd finestknown-app
+   git clone https://github.com/Jonahjones/Finest-Known-2.git
+   cd Finest-Known-2
    ```
 
-2. **Install dependencies**
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Set up environment variables**
-   Create a `.env` file in the root directory:
-   ```env
-   EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
-   EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+3. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Add your Supabase and API keys
    ```
 
-4. **Start the development server**
+4. **Start the development server:**
    ```bash
    npm start
    ```
 
-5. **Run on device/simulator**
-   ```bash
-   # iOS
-   npm run ios
-   
-   # Android
-   npm run android
-   
-   # Web
-   npm run web
-   ```
+## 🔧 Configuration
 
-## 🗄️ Database Setup
+### Supabase Setup
+1. Create a new Supabase project
+2. Run the database migrations from `docs/DATABASE_INTEGRATION.md`
+3. Add your Supabase URL and anon key to `.env`
 
-The app requires a Supabase database with the following tables:
+### API Keys
+- **GoldAPI.io**: Add your API key for real-time metal prices
+- **Other APIs**: Configure additional pricing sources as needed
 
-- `profiles` - User profiles
-- `categories` - Product categories
-- `products` - Precious metals products
-- `carts` - User shopping carts
-- `cart_items` - Items in carts
-- `orders` - Customer orders
-- `order_items` - Items in orders
-- `auctions` - Auction listings
-- `auction_bids` - Auction bids
-- `live_metal_prices` - Real-time metal prices
-- `articles` - Blog/resource articles
+## 📱 Screenshots
 
-See `PROJECT_DOCUMENTATION.md` for detailed schema definitions.
+- **Live Prices Ticker**: Real-time metal prices with smooth scrolling
+- **Authentication**: Modern sign-up/sign-in with SSO options
+- **Product Catalog**: Browse precious metals with filtering
+- **Shopping Cart**: Add items and proceed to checkout
+- **Auctions**: Bid on live precious metal auctions
 
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 finestknown-app/
-├── app/                          # Expo Router pages
-│   ├── _layout.tsx              # Root layout
-│   ├── (tabs)/                  # Tab navigation
-│   │   ├── index.tsx           # Home screen
-│   │   ├── catalog.tsx         # Catalog screen
-│   │   ├── auctions.tsx        # Auctions screen
-│   │   ├── cart.tsx            # Cart screen
-│   │   └── learn.tsx           # Learn screen
-│   ├── modal.tsx               # Modal screen
-│   ├── checkout.tsx            # Checkout screen
-│   └── test.tsx                # Test screen
-├── src/                         # Source code
-│   ├── api/                    # API functions
-│   ├── components/             # Reusable components
-│   ├── design/                 # Design system
-│   ├── hooks/                  # Custom hooks
-│   ├── lib/                    # Utilities
-│   ├── providers/              # Context providers
-│   └── store/                  # State management
-├── components/                  # Root components
-├── hooks/                      # Root hooks
-└── assets/                     # Static assets
+├── app/                    # Expo Router pages
+├── src/
+│   ├── api/               # API functions and types
+│   ├── components/        # Reusable UI components
+│   ├── design/           # Design tokens and themes
+│   ├── hooks/            # Custom React hooks
+│   ├── providers/        # Context providers
+│   └── store/            # State management
+├── docs/                 # Documentation
+└── upload-to-github.*    # Upload scripts
 ```
 
-## 🔧 Development
+## 🚀 Quick Start
 
-### Available Scripts
+1. **Run the upload script:**
+   ```bash
+   # Windows
+   upload-to-github.bat
+   
+   # PowerShell
+   .\upload-to-github.ps1
+   ```
 
-- `npm start` - Start the Expo development server
-- `npm run android` - Run on Android device/emulator
-- `npm run ios` - Run on iOS device/simulator
-- `npm run web` - Run on web browser
-- `npm run lint` - Run ESLint
+2. **Follow the GitHub setup instructions** in the script output
 
-### Code Style
+3. **Your app will be uploaded** to GitHub automatically!
 
-The project uses:
-- TypeScript for type safety
-- ESLint for code linting
-- Prettier for code formatting
-- Design tokens for consistent styling
+## 📄 Documentation
 
-## 🧪 Testing
-
-The app includes a test screen (`/test`) that demonstrates all UI components and design tokens. Access it through the app navigation or by navigating to `/test` in the development server.
-
-## 📦 Build & Deployment
-
-### Development Build
-
-```bash
-expo start
-```
-
-### Production Build
-
-```bash
-# Android
-expo build:android
-
-# iOS
-expo build:ios
-
-# Web
-expo export:web
-```
+- [Database Integration](docs/DATABASE_INTEGRATION.md)
+- [Environment Setup](docs/ENVIRONMENT_SETUP.md)
+- [Hooks Update](docs/HOOKS_UPDATE.md)
+- [Real-time Pricing Setup](REALTIME_PRICING_SETUP.md)
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+4. Submit a pull request
 
 ## 📄 License
 
 This project is licensed under the MIT License.
 
-## 📞 Support
+## 🎯 Roadmap
 
-For support or questions, please contact the development team or create an issue in the repository.
+- [ ] Push notifications for price alerts
+- [ ] Advanced charting and analytics
+- [ ] Social features and user profiles
+- [ ] Mobile app store deployment
+- [ ] Web version with responsive design
 
 ---
 
-Built with ❤️ using React Native, Expo, and Supabase.
+**Built with ❤️ for precious metals enthusiasts**

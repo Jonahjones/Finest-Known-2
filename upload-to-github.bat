@@ -1,35 +1,41 @@
 @echo off
-echo Starting GitHub upload process...
+echo ========================================
+echo Uploading FinestKnown App to GitHub
+echo Repository: https://github.com/Jonahjones/Finest-Known-2
+echo ========================================
 
 cd /d "%~dp0"
 
-echo Initializing git repository...
+echo.
+echo Step 1: Initializing git repository...
 git init
 
-echo Adding all files...
+echo.
+echo Step 2: Adding all files to git...
 git add .
 
-echo Creating initial commit...
+echo.
+echo Step 3: Creating initial commit...
 git commit -m "Initial commit: FinestKnown precious metals e-commerce app with real-time pricing, modern auth, and live ticker"
 
 echo.
-echo ========================================
-echo GitHub Repository Setup Required:
-echo ========================================
-echo 1. Go to https://github.com
-echo 2. Click "+" then "New repository"
-echo 3. Name: finestknown-app
-echo 4. Description: Precious metals e-commerce app with real-time pricing
-echo 5. Make it Public or Private
-echo 6. DON'T check "Add a README file"
-echo 7. Click "Create repository"
+echo Step 4: Adding remote repository...
+git remote add origin https://github.com/Jonahjones/Finest-Known-2.git
+
 echo.
-echo After creating the repository, run this command:
-echo git remote add origin https://github.com/YOUR_USERNAME/finestknown-app.git
-echo git branch -M main
-echo git push -u origin main
+echo Step 5: Setting main branch...
+git branch -M main
+
 echo.
-echo Replace YOUR_USERNAME with your actual GitHub username
+echo Step 6: Pushing to GitHub...
+git push -u origin main
+
+echo.
+echo ========================================
+echo Upload Complete!
+echo ========================================
+echo Your app is now live at:
+echo https://github.com/Jonahjones/Finest-Known-2
 echo ========================================
 
 pause
