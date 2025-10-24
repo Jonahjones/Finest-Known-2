@@ -5,18 +5,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography } from '../../src/design/tokens';
 import { useCartItemCount } from '../../src/hooks/useCart';
+import { useTheme } from '../../src/theme/ThemeProvider';
 // import { HapticTab } from '../../components/haptic-tab';
 // import { TabBarBackground } from '../../components/ui/tab-bar-background';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const cartItemCount = useCartItemCount();
+  const { isLuxeTheme, tokens } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.text.secondary,
+        tabBarActiveTintColor: isLuxeTheme ? tokens.colors.gold : colors.primary,
+        tabBarInactiveTintColor: isLuxeTheme ? tokens.colors.muted : colors.text.secondary,
         tabBarLabelStyle: {
           fontSize: typography.caption.fontSize,
           fontWeight: '600',
@@ -27,16 +29,16 @@ export default function TabLayout() {
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
-            backgroundColor: colors.background,
-            borderTopColor: colors.border,
+            backgroundColor: isLuxeTheme ? tokens.colors.bgElev : colors.background,
+            borderTopColor: isLuxeTheme ? tokens.colors.line : colors.border,
             borderTopWidth: 1,
             height: 90,
             paddingBottom: 20,
             paddingTop: 10,
           },
           default: {
-            backgroundColor: colors.background,
-            borderTopColor: colors.border,
+            backgroundColor: isLuxeTheme ? tokens.colors.bgElev : colors.background,
+            borderTopColor: isLuxeTheme ? tokens.colors.line : colors.border,
             borderTopWidth: 1,
             height: 50 + insets.bottom,
             paddingBottom: Math.max(insets.bottom, 4),
@@ -104,8 +106,8 @@ export default function TabLayout() {
                 color={color} 
               />
               {cartItemCount > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
+                <View style={[styles.badge, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}>
+                  <Text style={[styles.badgeText, isLuxeTheme && { color: tokens.colors.bg }]}>
                     {cartItemCount > 99 ? '99+' : cartItemCount}
                   </Text>
                 </View>
