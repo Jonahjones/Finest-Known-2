@@ -15,8 +15,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const loadThemeState = async () => {
-      const enabled = await isLuxeThemeEnabled();
-      setIsLuxeTheme(enabled);
+      try {
+        // Force enable luxury theme for now
+        await enableLuxeTheme();
+        console.log('Theme forced to luxury mode');
+        setIsLuxeTheme(true);
+      } catch (error) {
+        console.warn('Error loading theme state, using default:', error);
+        // Keep default true value
+      }
     };
     loadThemeState();
   }, []);

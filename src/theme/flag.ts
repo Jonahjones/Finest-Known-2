@@ -12,13 +12,19 @@ export const disableLuxeTheme = async () => {
 };
 
 export const isLuxeThemeEnabled = async (): Promise<boolean> => {
-  const value = await AsyncStorage.getItem(THEME_FLAG_KEY);
-  return value === 'true';
+  try {
+    const value = await AsyncStorage.getItem(THEME_FLAG_KEY);
+    console.log('Stored theme value:', value);
+    return value === 'true';
+  } catch (error) {
+    console.warn('Error reading theme flag, defaulting to true:', error);
+    return true; // Default to luxury theme
+  }
 };
 
 // Check environment variable for initial theme state
 export const getInitialThemeState = (): boolean => {
   // In React Native, we can't access process.env directly, so we'll use a different approach
   // This could be set via app config or build-time configuration
-  return false; // Default to false, can be overridden
+  return true; // Default to luxury theme
 };

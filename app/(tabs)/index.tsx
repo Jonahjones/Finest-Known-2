@@ -12,6 +12,10 @@ import { useTheme } from '../../src/theme/ThemeProvider';
 
 export default function HomeScreen() {
   const { isLuxeTheme, tokens } = useTheme();
+  
+  // Debug logging
+  console.log('HomeScreen - isLuxeTheme:', isLuxeTheme);
+  console.log('HomeScreen - tokens:', tokens);
   const luxeStyles = isLuxeTheme ? {
     container: { backgroundColor: tokens.colors.bg },
     header: { backgroundColor: tokens.colors.bgElev },
