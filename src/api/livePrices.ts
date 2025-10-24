@@ -34,87 +34,118 @@ async function savePreviousPrices(prices: LivePrice[]): Promise<void> {
   }
 }
 
-// Real-time metal prices from GoldAPI.io
+// Real-time metal prices from multiple APIs
 async function fetchRealTimePrices(): Promise<LivePrice[]> {
-  const metals = [
-    { symbol: 'XAU', metal: 'gold', id: '1' },
-    { symbol: 'XAG', metal: 'silver', id: '2' },
-    { symbol: 'XPT', metal: 'platinum', id: '3' },
-    { symbol: 'XPD', metal: 'palladium', id: '4' }
-  ];
-
   const prices: LivePrice[] = [];
-  const apiKey = 'goldapi-1kwlwsmh3rkk04-io';
-
-  for (const { symbol, metal, id } of metals) {
-    try {
-      console.log(`Fetching ${metal} price from GoldAPI...`);
-      
-      const response = await fetch(`https://www.goldapi.io/api/${symbol}/USD`, {
-        method: 'GET',
-        headers: {
-          'x-access-token': apiKey,
-          'Content-Type': 'application/json',
-          'User-Agent': 'FinestKnown/1.0'
-        },
-        timeout: 15000 // 15 second timeout
-      });
-      
-      if (!response.ok) {
-        console.warn(`GoldAPI returned ${response.status} for ${metal}`);
-        continue;
-      }
-      
+  
+  // Try MetalsAPI first (free tier available)
+  try {
+    console.log('Fetching prices from MetalsAPI...');
+    const response = await fetch('https://api.metals.live/v1/spot', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'FinestKnown/1.0'
+      },
+      timeout: 10000
+    });
+    
+    if (response.ok) {
       const data = await response.json();
-      console.log(`${metal} API Response:`, data);
+      console.log('MetalsAPI Response:', data);
       
-      if (data.price) {
-        // Find previous price for this metal to calculate change
-        const previousPrice = previousPrices.find(p => p.metal === metal);
-        let change = 0;
-        let changePercent = 0;
-        
-        if (previousPrice) {
-          // Calculate change from our previous fetch
-          change = data.price - previousPrice.price;
-          changePercent = (change / previousPrice.price) * 100;
-          console.log(`${metal} change calculation: $${previousPrice.price} -> $${data.price} = ${changePercent.toFixed(2)}%`);
-        } else {
-          // For first fetch or when no previous data, try to use API's change data
-          // But also try to get a more recent reference point
-          if (data.change !== undefined && data.change_percent !== undefined) {
-            change = data.change;
-            changePercent = data.change_percent;
-            console.log(`${metal} using API change data: ${changePercent.toFixed(2)}%`);
-          } else {
-            // If no change data available, set to 0
-            change = 0;
-            changePercent = 0;
-            console.log(`${metal} no change data available, setting to 0%`);
+      // Map MetalsAPI response to our format
+      const metalMappings = [
+        { key: 'gold', metal: 'gold', id: '1' },
+        { key: 'silver', metal: 'silver', id: '2' },
+        { key: 'platinum', metal: 'platinum', id: '3' },
+        { key: 'palladium', metal: 'palladium', id: '4' }
+      ];
+      
+      for (const { key, metal, id } of metalMappings) {
+        if (data[key] && data[key].price) {
+          const previousPrice = previousPrices.find(p => p.metal === metal);
+          let change = 0;
+          let changePercent = 0;
+          
+          if (previousPrice) {
+            change = data[key].price - previousPrice.price;
+            changePercent = (change / previousPrice.price) * 100;
+          } else if (data[key].change !== undefined) {
+            change = data[key].change;
+            changePercent = data[key].change_percent || 0;
           }
+          
+          prices.push({
+            id,
+            metal,
+            price: data[key].price,
+            change: change,
+            changePercent: changePercent,
+            lastUpdated: new Date().toISOString(),
+          });
+          
+          console.log(`Successfully fetched ${metal} price: $${data[key].price} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
         }
-        
-        prices.push({
-          id,
-          metal,
-          price: data.price,
-          change: change,
-          changePercent: changePercent,
-          lastUpdated: new Date().toISOString(),
-        });
-        console.log(`Successfully fetched ${metal} price: $${data.price} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
-      } else {
-        console.warn(`No price data for ${metal}`);
       }
+    }
+  } catch (error) {
+    console.warn('MetalsAPI failed:', error);
+  }
+  
+  // If MetalsAPI didn't work, try Alpha Vantage (free tier)
+  if (prices.length === 0) {
+    try {
+      console.log('Trying Alpha Vantage API...');
+      const apiKey = 'demo'; // Free demo key
+      const symbols = ['XAU', 'XAG', 'XPT', 'XPD'];
+      const metals = ['gold', 'silver', 'platinum', 'palladium'];
       
+      for (let i = 0; i < symbols.length; i++) {
+        try {
+          const response = await fetch(`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${symbols[i]}&to_currency=USD&apikey=${apiKey}`, {
+            method: 'GET',
+            timeout: 10000
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const rate = data['Realtime Currency Exchange Rate'];
+            
+            if (rate && rate['5. Exchange Rate']) {
+              const price = parseFloat(rate['5. Exchange Rate']);
+              const previousPrice = previousPrices.find(p => p.metal === metals[i]);
+              let change = 0;
+              let changePercent = 0;
+              
+              if (previousPrice) {
+                change = price - previousPrice.price;
+                changePercent = (change / previousPrice.price) * 100;
+              }
+              
+              prices.push({
+                id: (i + 1).toString(),
+                metal: metals[i],
+                price: price,
+                change: change,
+                changePercent: changePercent,
+                lastUpdated: new Date().toISOString(),
+              });
+              
+              console.log(`Successfully fetched ${metals[i]} price: $${price} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
+            }
+          }
+        } catch (error) {
+          console.warn(`Error fetching ${metals[i]} from Alpha Vantage:`, error);
+        }
+      }
     } catch (error) {
-      console.warn(`Error fetching ${metal} price:`, error);
-      continue;
+      console.warn('Alpha Vantage failed:', error);
     }
   }
   
   if (prices.length === 0) {
-    throw new Error('Could not fetch any metal prices from GoldAPI');
+    throw new Error('Could not fetch any metal prices from available APIs');
   }
   
   // Store current prices as previous prices for next calculation

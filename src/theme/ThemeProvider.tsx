@@ -11,7 +11,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [isLuxeTheme, setIsLuxeTheme] = useState(false);
+  const [isLuxeTheme, setIsLuxeTheme] = useState(true); // Enable luxury theme by default
 
   useEffect(() => {
     const loadThemeState = async () => {
