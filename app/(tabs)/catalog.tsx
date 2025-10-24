@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { getProducts, getCategories, searchProducts } from '../../src/api/products';
 import { ProductCard } from '../../src/components/ui/ProductCard';
+import { colors } from '../../src/design/tokens';
 import { Button } from '../../src/components/ui/Button';
 import { useTheme } from '../../src/theme/ThemeProvider';
 

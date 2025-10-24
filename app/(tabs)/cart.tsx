@@ -13,6 +13,7 @@ import { useCart } from '../../src/hooks/useCart';
 import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
 import { useTheme } from '../../src/theme/ThemeProvider';
+import { colors } from '../../src/design/tokens';
 
 export default function CartScreen() {
   const { isLuxeTheme, tokens } = useTheme();
