@@ -3,7 +3,7 @@ import { Tabs } from 'expo-router';
 import { Platform, View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography } from '../../src/design/tokens';
+// import { colors, typography } from '../../src/design/tokens';
 import { useCartItemCount } from '../../src/hooks/useCart';
 import { useTheme } from '../../src/theme/ThemeProvider';
 // import { HapticTab } from '../../components/haptic-tab';
@@ -21,18 +21,18 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: isLuxeTheme ? (tokens?.colors?.gold || '#D4AF37') : colors.primary,
-        tabBarInactiveTintColor: isLuxeTheme ? (tokens?.colors?.muted || '#B5B5B5') : colors.text.secondary,
+        tabBarActiveTintColor: isLuxeTheme ? (tokens?.colors?.gold || '#D4AF37') : '#000000',
+        tabBarInactiveTintColor: isLuxeTheme ? (tokens?.colors?.muted || '#B5B5B5') : '#6B7280',
         tabBarLabelStyle: {
-          fontSize: typography.caption.fontSize,
+          fontSize: 13,
           fontWeight: '600',
         },
         headerShown: false,
         // tabBarButton: HapticTab,
         // tabBarBackground: TabBarBackground,
         tabBarStyle: {
-          backgroundColor: isLuxeTheme ? (tokens?.colors?.bgElev || '#111111') : colors.background,
-          borderTopColor: isLuxeTheme ? (tokens?.colors?.line || '#262626') : colors.border,
+          backgroundColor: isLuxeTheme ? (tokens?.colors?.bgElev || '#111111') : '#FFFFFF',
+          borderTopColor: isLuxeTheme ? (tokens?.colors?.line || '#262626') : '#E5E7EB',
           borderTopWidth: 1,
           height: Platform.OS === 'ios' ? 90 : 50 + insets.bottom,
           paddingBottom: Platform.OS === 'ios' ? 20 : Math.max(insets.bottom, 4),
@@ -142,13 +142,13 @@ const styles = {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.accent,
+    backgroundColor: '#00D4AA',
   },
   badge: {
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: colors.accent,
+    backgroundColor: '#00D4AA',
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -156,7 +156,7 @@ const styles = {
     justifyContent: 'center',
   },
   badgeText: {
-    color: colors.text.inverse,
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '600',
   },
