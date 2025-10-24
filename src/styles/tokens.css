@@ -1,0 +1,44 @@
+:root {
+  /* Base Colors */
+  --bg: #0b0b0b;
+  --bg-elev: #111111;
+  --surface: #151515;
+  --line: #262626;
+  --text: #f5f5f5;
+  --muted: #b5b5b5;
+  --gold: #d4af37;
+  --gold-600: #b8902f;
+  --accent: #8a7b5a;
+  --danger: #ff5a5a;
+  --success: #32c36a;
+
+  /* Border Radius */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  /* Shadows */
+  --shadow-1: 0 2px 10px rgba(0,0,0,0.25);
+  --shadow-2: 0 8px 24px rgba(0,0,0,0.28);
+
+  /* Typography */
+  --font-display: 'Playfair Display', ui-serif, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui;
+}
+
+html[data-theme="luxe"] {
+  color-scheme: dark;
+  background: var(--bg);
+}
+
+/* Dark mode overrides */
+html[data-theme="luxe"], .dark {
+  --ring: color(display-p3 0.83 0.74 0.40 / 0.5);
+}
+
+html[data-theme="luxe"] body {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

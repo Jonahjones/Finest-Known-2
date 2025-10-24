@@ -13,6 +13,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../src/store/AuthContext';
+import { useTheme } from '../src/theme/ThemeProvider';
+import { ThemeToggle } from '../src/components/ThemeToggle';
 
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(true);
@@ -20,6 +24,9 @@ export default function AuthScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [useOfflineMode, setUseOfflineMode] = useState(false);
+  const { signIn, signUp } = useAuth();
+  const { isLuxeTheme, tokens } = useTheme();
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -28,11 +35,18 @@ export default function AuthScreen() {
     }
     
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        router.replace('/(tabs)');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
       setLoading(false);
-      router.replace('/(tabs)');
-    }, 1000);
+    }
   };
 
   const handleSignUp = async () => {
@@ -47,11 +61,80 @@ export default function AuthScreen() {
     }
     
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const { error } = await signUp(email, password);
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        router.replace('/(tabs)');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
       setLoading(false);
-      router.replace('/(tabs)');
-    }, 1000);
+    }
+  };
+
+
+  const handleTestSSO = async () => {
+    setLoading(true);
+    try {
+      console.log('Starting Test SSO authentication...');
+      
+      // First try to sign in with test user
+      console.log('Attempting to sign in with test user...');
+      const { data: signInData, error: signInError } = await signIn('test@finestknown.com', 'testpassword123');
+      
+      if (signInError) {
+        console.log('Sign in failed, attempting to create new user:', signInError.message);
+        
+        // If test user doesn't exist, create one
+        const { data: signUpData, error: signUpError } = await signUp('test@finestknown.com', 'testpassword123');
+        
+        if (signUpError) {
+          console.error('Sign up error:', signUpError);
+          Alert.alert('Authentication Error', `Failed to create test account: ${signUpError.message}`);
+        } else {
+          console.log('Test account created successfully:', signUpData);
+          Alert.alert('Success', 'Test account created! You will now see the onboarding quiz.');
+          router.replace('/(tabs)');
+        }
+      } else {
+        console.log('Sign in successful:', signInData);
+        Alert.alert('Success', 'Signed in with test account! You will now see the onboarding quiz.');
+        router.replace('/(tabs)');
+      }
+    } catch (error) {
+      console.error('Test SSO error:', error);
+      
+      // Offer offline mode as fallback
+      Alert.alert(
+        'Network Error', 
+        `Failed to connect to authentication service. Would you like to use offline mode for testing?\n\nError: ${error.message || 'Unknown error'}`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel'
+          },
+          {
+            text: 'Use Offline Mode',
+            onPress: async () => {
+              try {
+                await AsyncStorage.setItem('finestknown_offline_mode', 'true');
+                setUseOfflineMode(true);
+                Alert.alert('Offline Mode', 'Using offline mode. You will see the onboarding quiz without creating a real account.');
+                router.replace('/(tabs)');
+              } catch (error) {
+                console.error('Failed to set offline mode:', error);
+                Alert.alert('Error', 'Failed to enable offline mode. Please try again.');
+              }
+            }
+          }
+        ]
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSSO = (provider: string) => {
@@ -88,26 +171,31 @@ export default function AuthScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Theme Toggle */}
+          <View style={styles.themeToggleContainer}>
+            <ThemeToggle />
+          </View>
+
           {/* Back Button */}
           <TouchableOpacity 
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={24} color={isLuxeTheme ? tokens.colors.text : "#FFFFFF"} />
           </TouchableOpacity>
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>
+            <Text style={[styles.title, isLuxeTheme && { color: tokens.colors.text, fontFamily: tokens.typography.display }]}>
               {isSignUp ? 'Create Account' : 'Sign In'}
             </Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.subtitle, isLuxeTheme && { color: tokens.colors.muted }]}>
               {isSignUp 
                 ? 'Start your precious metals journey' 
                 : 'Access your portfolio'
@@ -231,13 +319,16 @@ export default function AuthScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Fake SSO for Testing - At Bottom */}
+          {/* Test SSO for Testing - At Bottom */}
           <TouchableOpacity 
             style={[styles.ssoButton, styles.fakeButton]}
-            onPress={handleFakeSSO}
+            onPress={handleTestSSO}
+            disabled={loading}
           >
             <Ionicons name="flash" size={20} color="#FFFFFF" />
-            <Text style={styles.ssoButtonText}>🚀 Fake SSO (Testing)</Text>
+            <Text style={styles.ssoButtonText}>
+              {loading ? '🔄 Testing SSO...' : '🚀 Test SSO'}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -256,6 +347,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
+  },
+  themeToggleContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 24,
+    zIndex: 10,
   },
   backButton: {
     position: 'absolute',
