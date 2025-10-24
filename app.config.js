@@ -19,8 +19,8 @@ export default {
       "expo-router"
     ],
     extra: {
-      supabaseUrl: "https://oghzxwjqhsmbqfuovqju.supabase.co",
-      supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9naHp4d2pxaHNtYnFmdW92cWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY5MTc3MjAsImV4cCI6MjA1MjQ5MzcyMH0.1YHhWdXHWcx5Zb6qkxjBYTW_CJdvbzpI_DYoGmZYNgM"
+      supabaseUrl: "https://rhwuncdxjlzmsgiprdkz.supabase.co",
+      supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJod3VuY2R4amx6bXNnaXByZGt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNDM4OTYsImV4cCI6MjA3MzcxOTg5Nn0.3jvar_teSXL2NtV7WEA3yQofFxLc_ZeewfpLyTBksAY"
     }
   }
 };
