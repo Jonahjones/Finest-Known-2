@@ -18,6 +18,7 @@ import { useAuth } from '../src/store/AuthContext';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { ThemeToggle } from '../src/components/ThemeToggle';
 import { supabase } from '../src/lib/supabase';
+import { useOnboardingStore } from '../src/store/onboardingStore';
 
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(true);
@@ -28,6 +29,7 @@ export default function AuthScreen() {
   const [useOfflineMode, setUseOfflineMode] = useState(false);
   const { signIn, signUp } = useAuth();
   const { isLuxeTheme, tokens } = useTheme();
+  const { resetOnboarding } = useOnboardingStore();
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -109,11 +111,15 @@ export default function AuthScreen() {
           Alert.alert('Authentication Error', `Failed to create test account: ${signUpError.message}`);
         } else {
           console.log('Test account created successfully:', signUpData);
+          // Reset onboarding state for new user
+          resetOnboarding();
           Alert.alert('Success', 'Test account created! You will now see the onboarding quiz.');
           router.replace('/(tabs)');
         }
       } else {
         console.log('Sign in successful:', signInData);
+        // Reset onboarding state to ensure quiz shows for existing users
+        resetOnboarding();
         Alert.alert('Success', 'Signed in with test account! You will now see the onboarding quiz.');
         router.replace('/(tabs)');
       }
