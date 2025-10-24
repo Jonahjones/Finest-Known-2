@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
 const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || 'https://oghzxwjqhsmbqfuovqju.supabase.co';
@@ -6,6 +7,7 @@ const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey || 'eyJhbGc
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
+    storage: AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
@@ -13,15 +15,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
     headers: {
       'x-my-custom-header': 'finestknown-app',
-    },
-    fetch: (url, options = {}) => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-      
-      return fetch(url, {
-        ...options,
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timeoutId));
     },
   },
 });

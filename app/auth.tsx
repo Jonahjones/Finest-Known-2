@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../src/store/AuthContext';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { ThemeToggle } from '../src/components/ThemeToggle';
+import { supabase } from '../src/lib/supabase';
 
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(true);
@@ -81,7 +82,19 @@ export default function AuthScreen() {
     try {
       console.log('Starting Test SSO authentication...');
       
-      // First try to sign in with test user
+      // First test basic connectivity
+      console.log('Testing Supabase connectivity...');
+      const { data: testData, error: testError } = await supabase.from('profiles').select('id').limit(1);
+      
+      if (testError) {
+        console.log('Supabase connectivity test failed:', testError.message);
+        Alert.alert('Connection Error', `Cannot connect to authentication service: ${testError.message}`);
+        return;
+      }
+      
+      console.log('Supabase connectivity test passed');
+      
+      // Now try to sign in with test user
       console.log('Attempting to sign in with test user...');
       const { data: signInData, error: signInError } = await signIn('test@finestknown.com', 'testpassword123');
       
