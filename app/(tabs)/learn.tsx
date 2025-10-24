@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../src/components/ui/Card';
-import { colors, typography, spacing } from '../../src/design/tokens';
+import { useTheme } from '../../src/theme/ThemeProvider';
 
 // Mock article data - in real app, this would come from API
 const mockArticles = [
@@ -71,6 +71,7 @@ const categories = [
 ];
 
 export default function LearnScreen() {
+  const { isLuxeTheme, tokens } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [refreshing, setRefreshing] = useState(false);

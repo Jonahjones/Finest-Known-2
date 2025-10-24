@@ -14,9 +14,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { getProducts, getCategories, searchProducts } from '../../src/api/products';
 import { ProductCard } from '../../src/components/ui/ProductCard';
 import { Button } from '../../src/components/ui/Button';
-import { colors, typography, spacing } from '../../src/design/tokens';
+import { useTheme } from '../../src/theme/ThemeProvider';
 
 export default function CatalogScreen() {
+  const { isLuxeTheme, tokens } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high'>('newest');
