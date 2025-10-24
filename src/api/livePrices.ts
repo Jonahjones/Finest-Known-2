@@ -34,124 +34,73 @@ async function savePreviousPrices(prices: LivePrice[]): Promise<void> {
   }
 }
 
-// Fetch real-time precious metal prices from reliable free APIs
+// Fetch real-time precious metal prices from MetalPriceAPI
 async function fetchRealTimePrices(): Promise<LivePrice[]> {
   const prices: LivePrice[] = [];
   
   try {
-    console.log('Fetching real-time precious metal prices...');
+    console.log('Fetching real-time precious metal prices from MetalPriceAPI...');
     
-    // Try MetalAPI.io (free tier with 100 requests/month)
+    // Use MetalPriceAPI with provided API key
     try {
-      console.log('Trying MetalAPI.io...');
-      const response = await fetch('https://api.metals.live/v1/spot', {
+      const apiKey = '84edb30368bb74ccd2e666d1f489d020';
+      const response = await fetch(`https://api.metalpriceapi.com/v1/latest?api_key=${apiKey}&base=USD&currencies=EUR,XAU,XAG,XPT,XPD`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'FinestKnown/1.0'
         },
-        timeout: 10000
+        timeout: 15000
       });
       
       if (response.ok) {
         const data = await response.json();
-        console.log('MetalAPI Response:', data);
+        console.log('MetalPriceAPI Response:', data);
         
         // Map response to our format
         const metalMappings = [
-          { key: 'gold', metal: 'gold', id: '1' },
-          { key: 'silver', metal: 'silver', id: '2' },
-          { key: 'platinum', metal: 'platinum', id: '3' },
-          { key: 'palladium', metal: 'palladium', id: '4' }
+          { key: 'XAU', metal: 'gold', id: '1' },
+          { key: 'XAG', metal: 'silver', id: '2' },
+          { key: 'XPT', metal: 'platinum', id: '3' },
+          { key: 'XPD', metal: 'palladium', id: '4' }
         ];
         
         for (const { key, metal, id } of metalMappings) {
-          if (data[key] && data[key].price) {
+          if (data.rates && data.rates[key]) {
+            // MetalPriceAPI returns rates as 1 USD = X ounces of metal
+            // So we need to calculate 1 ounce = 1/rate USD
+            const rate = data.rates[key];
+            const pricePerOunce = 1 / rate;
+            
             const previousPrice = previousPrices.find(p => p.metal === metal);
             let change = 0;
             let changePercent = 0;
             
             if (previousPrice) {
-              change = data[key].price - previousPrice.price;
+              change = pricePerOunce - previousPrice.price;
               changePercent = (change / previousPrice.price) * 100;
-            } else if (data[key].change !== undefined) {
-              change = data[key].change;
-              changePercent = data[key].change_percent || 0;
             }
             
             prices.push({
               id,
               metal,
-              price: data[key].price,
+              price: pricePerOunce,
               change: change,
               changePercent: changePercent,
               lastUpdated: new Date().toISOString(),
             });
             
-            console.log(`Successfully fetched ${metal} price: $${data[key].price} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
+            console.log(`Successfully fetched ${metal} price: $${pricePerOunce.toFixed(2)} per ounce (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
           }
         }
+      } else {
+        console.warn(`MetalPriceAPI returned ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
-      console.warn('MetalAPI failed:', error);
+      console.warn('MetalPriceAPI failed:', error);
     }
     
-    // If MetalAPI didn't work, try Alpha Vantage (free tier)
-    if (prices.length === 0) {
-      try {
-        console.log('Trying Alpha Vantage...');
-        const apiKey = 'demo'; // Using demo key for testing
-        const symbols = ['XAU', 'XAG', 'XPT', 'XPD'];
-        const metals = ['gold', 'silver', 'platinum', 'palladium'];
-        
-        for (let i = 0; i < symbols.length; i++) {
-          try {
-            const response = await fetch(`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${symbols[i]}&to_currency=USD&apikey=${apiKey}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'User-Agent': 'FinestKnown/1.0'
-              },
-              timeout: 10000
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              console.log(`${metals[i]} Alpha Vantage Response:`, data);
-              
-              if (data['Realtime Currency Exchange Rate'] && data['Realtime Currency Exchange Rate']['5. Exchange Rate']) {
-                const price = parseFloat(data['Realtime Currency Exchange Rate']['5. Exchange Rate']);
-                const previousPrice = previousPrices.find(p => p.metal === metals[i]);
-                let change = 0;
-                let changePercent = 0;
-                
-                if (previousPrice) {
-                  change = price - previousPrice.price;
-                  changePercent = (change / previousPrice.price) * 100;
-                }
-                
-                prices.push({
-                  id: (i + 1).toString(),
-                  metal: metals[i],
-                  price: price,
-                  change: change,
-                  changePercent: changePercent,
-                  lastUpdated: new Date().toISOString(),
-                });
-                
-                console.log(`Successfully fetched ${metals[i]} price: $${price} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
-              }
-            }
-          } catch (error) {
-            console.warn(`Error fetching ${metals[i]} from Alpha Vantage:`, error);
-          }
-        }
-      } catch (error) {
-        console.warn('Alpha Vantage failed:', error);
-      }
-    }
-    
-    // If both APIs failed, use realistic fallback prices based on current market
+    // If MetalPriceAPI didn't work, use realistic fallback prices based on current market
     if (prices.length === 0) {
       console.log('Using fallback prices based on current market...');
       const fallbackPrices = [
@@ -180,7 +129,7 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
           lastUpdated: new Date().toISOString(),
         });
         
-        console.log(`Using fallback ${fallback.metal} price: $${fallback.price} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
+        console.log(`Using fallback ${fallback.metal} price: $${fallback.price} per ounce (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
       }
     }
     
@@ -189,7 +138,7 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
   }
   
   if (prices.length === 0) {
-    throw new Error('Could not fetch any metal prices from available APIs');
+    throw new Error('Could not fetch any metal prices from MetalPriceAPI');
   }
   
   // Store current prices as previous prices for next calculation
