@@ -13,12 +13,16 @@ export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const cartItemCount = useCartItemCount();
   const { isLuxeTheme, tokens } = useTheme();
+  
+  // Debug logging
+  console.log('TabLayout - isLuxeTheme:', isLuxeTheme);
+  console.log('TabLayout - tokens:', tokens);
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: isLuxeTheme ? tokens.colors.gold : colors.primary,
-        tabBarInactiveTintColor: isLuxeTheme ? tokens.colors.muted : colors.text.secondary,
+        tabBarActiveTintColor: isLuxeTheme ? (tokens?.colors?.gold || '#D4AF37') : colors.primary,
+        tabBarInactiveTintColor: isLuxeTheme ? (tokens?.colors?.muted || '#B5B5B5') : colors.text.secondary,
         tabBarLabelStyle: {
           fontSize: typography.caption.fontSize,
           fontWeight: '600',
@@ -26,25 +30,14 @@ export default function TabLayout() {
         headerShown: false,
         // tabBarButton: HapticTab,
         // tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-            backgroundColor: isLuxeTheme ? tokens.colors.bgElev : colors.background,
-            borderTopColor: isLuxeTheme ? tokens.colors.line : colors.border,
-            borderTopWidth: 1,
-            height: 90,
-            paddingBottom: 20,
-            paddingTop: 10,
-          },
-          default: {
-            backgroundColor: isLuxeTheme ? tokens.colors.bgElev : colors.background,
-            borderTopColor: isLuxeTheme ? tokens.colors.line : colors.border,
-            borderTopWidth: 1,
-            height: 50 + insets.bottom,
-            paddingBottom: Math.max(insets.bottom, 4),
-            paddingTop: 4,
-          },
-        }),
+        tabBarStyle: {
+          backgroundColor: isLuxeTheme ? (tokens?.colors?.bgElev || '#111111') : colors.background,
+          borderTopColor: isLuxeTheme ? (tokens?.colors?.line || '#262626') : colors.border,
+          borderTopWidth: 1,
+          height: Platform.OS === 'ios' ? 90 : 50 + insets.bottom,
+          paddingBottom: Platform.OS === 'ios' ? 20 : Math.max(insets.bottom, 4),
+          paddingTop: Platform.OS === 'ios' ? 10 : 4,
+        },
       }}>
       <Tabs.Screen
         name="index"
@@ -106,8 +99,8 @@ export default function TabLayout() {
                 color={color} 
               />
               {cartItemCount > 0 && (
-                <View style={[styles.badge, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}>
-                  <Text style={[styles.badgeText, isLuxeTheme && { color: tokens.colors.bg }]}>
+                <View style={[styles.badge, isLuxeTheme && { backgroundColor: tokens?.colors?.gold || '#D4AF37' }]}>
+                  <Text style={[styles.badgeText, isLuxeTheme && { color: tokens?.colors?.bg || '#0B0B0B' }]}>
                     {cartItemCount > 99 ? '99+' : cartItemCount}
                   </Text>
                 </View>
