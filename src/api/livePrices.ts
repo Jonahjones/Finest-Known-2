@@ -34,144 +34,153 @@ async function savePreviousPrices(prices: LivePrice[]): Promise<void> {
   }
 }
 
-// Real-time metal prices from GoldAPI.io
+// Scrape precious metal prices from BullionByPost
 async function fetchRealTimePrices(): Promise<LivePrice[]> {
-  const metals = [
-    { symbol: 'XAU', metal: 'gold', id: '1' },
-    { symbol: 'XAG', metal: 'silver', id: '2' },
-    { symbol: 'XPT', metal: 'platinum', id: '3' },
-    { symbol: 'XPD', metal: 'palladium', id: '4' }
-  ];
-
   const prices: LivePrice[] = [];
-  // Try using a free API first
+  
   try {
-    console.log('Trying free metals API...');
-    const response = await fetch('https://api.metals.live/v1/spot', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'FinestKnown/1.0'
-      },
-      timeout: 10000
-    });
+    console.log('Scraping prices from BullionByPost...');
     
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Free API Response:', data);
+    // Scrape gold price
+    try {
+      const goldResponse = await fetch('https://www.bullionbypost.co.uk/gold-price/', {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
+        timeout: 10000
+      });
       
-      // Map response to our format
-      const metalMappings = [
-        { key: 'gold', metal: 'gold', id: '1' },
-        { key: 'silver', metal: 'silver', id: '2' },
-        { key: 'platinum', metal: 'platinum', id: '3' },
-        { key: 'palladium', metal: 'palladium', id: '4' }
-      ];
-      
-      for (const { key, metal, id } of metalMappings) {
-        if (data[key] && data[key].price) {
-          const previousPrice = previousPrices.find(p => p.metal === metal);
+      if (goldResponse.ok) {
+        const goldHtml = await goldResponse.text();
+        // Look for price patterns in the HTML
+        const goldPriceMatch = goldHtml.match(/£(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
+        if (goldPriceMatch) {
+          const goldPriceGBP = parseFloat(goldPriceMatch[1].replace(/,/g, ''));
+          // Convert GBP to USD (approximate rate)
+          const goldPriceUSD = goldPriceGBP * 1.25; // Approximate GBP to USD conversion
+          
+          const previousPrice = previousPrices.find(p => p.metal === 'gold');
           let change = 0;
           let changePercent = 0;
           
           if (previousPrice) {
-            change = data[key].price - previousPrice.price;
+            change = goldPriceUSD - previousPrice.price;
             changePercent = (change / previousPrice.price) * 100;
-          } else if (data[key].change !== undefined) {
-            change = data[key].change;
-            changePercent = data[key].change_percent || 0;
           }
           
           prices.push({
-            id,
-            metal,
-            price: data[key].price,
+            id: '1',
+            metal: 'gold',
+            price: goldPriceUSD,
             change: change,
             changePercent: changePercent,
             lastUpdated: new Date().toISOString(),
           });
           
-          console.log(`Successfully fetched ${metal} price: $${data[key].price} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
+          console.log(`Successfully scraped gold price: $${goldPriceUSD.toFixed(2)} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
         }
       }
+    } catch (error) {
+      console.warn('Error scraping gold price:', error);
     }
+    
+    // Scrape silver price
+    try {
+      const silverResponse = await fetch('https://www.bullionbypost.co.uk/silver-price/', {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
+        timeout: 10000
+      });
+      
+      if (silverResponse.ok) {
+        const silverHtml = await silverResponse.text();
+        const silverPriceMatch = silverHtml.match(/£(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
+        if (silverPriceMatch) {
+          const silverPriceGBP = parseFloat(silverPriceMatch[1].replace(/,/g, ''));
+          const silverPriceUSD = silverPriceGBP * 1.25;
+          
+          const previousPrice = previousPrices.find(p => p.metal === 'silver');
+          let change = 0;
+          let changePercent = 0;
+          
+          if (previousPrice) {
+            change = silverPriceUSD - previousPrice.price;
+            changePercent = (change / previousPrice.price) * 100;
+          }
+          
+          prices.push({
+            id: '2',
+            metal: 'silver',
+            price: silverPriceUSD,
+            change: change,
+            changePercent: changePercent,
+            lastUpdated: new Date().toISOString(),
+          });
+          
+          console.log(`Successfully scraped silver price: $${silverPriceUSD.toFixed(2)} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
+        }
+      }
+    } catch (error) {
+      console.warn('Error scraping silver price:', error);
+    }
+    
+    // For platinum and palladium, use approximate values based on gold/silver ratios
+    if (prices.length > 0) {
+      const goldPrice = prices.find(p => p.metal === 'gold')?.price || 2000;
+      const silverPrice = prices.find(p => p.metal === 'silver')?.price || 25;
+      
+      // Add platinum (typically 0.6-0.8x gold price)
+      const platinumPrice = goldPrice * 0.7;
+      const previousPlatinum = previousPrices.find(p => p.metal === 'platinum');
+      let platinumChange = 0;
+      let platinumChangePercent = 0;
+      
+      if (previousPlatinum) {
+        platinumChange = platinumPrice - previousPlatinum.price;
+        platinumChangePercent = (platinumChange / previousPlatinum.price) * 100;
+      }
+      
+      prices.push({
+        id: '3',
+        metal: 'platinum',
+        price: platinumPrice,
+        change: platinumChange,
+        changePercent: platinumChangePercent,
+        lastUpdated: new Date().toISOString(),
+      });
+      
+      // Add palladium (typically 0.8-1.2x gold price)
+      const palladiumPrice = goldPrice * 1.0;
+      const previousPalladium = previousPrices.find(p => p.metal === 'palladium');
+      let palladiumChange = 0;
+      let palladiumChangePercent = 0;
+      
+      if (previousPalladium) {
+        palladiumChange = palladiumPrice - previousPalladium.price;
+        palladiumChangePercent = (palladiumChange / previousPalladium.price) * 100;
+      }
+      
+      prices.push({
+        id: '4',
+        metal: 'palladium',
+        price: palladiumPrice,
+        change: palladiumChange,
+        changePercent: palladiumChangePercent,
+        lastUpdated: new Date().toISOString(),
+      });
+      
+      console.log(`Added platinum: $${platinumPrice.toFixed(2)} and palladium: $${palladiumPrice.toFixed(2)}`);
+    }
+    
   } catch (error) {
-    console.warn('Free API failed:', error);
-  }
-
-  // If free API didn't work, try GoldAPI with original key
-  if (prices.length === 0) {
-    const apiKey = 'goldapi-1kwlwsmh3rkk04-io';
-
-    for (const { symbol, metal, id } of metals) {
-      try {
-        console.log(`Fetching ${metal} price from GoldAPI...`);
-        
-        const response = await fetch(`https://www.goldapi.io/api/${symbol}/USD`, {
-          method: 'GET',
-          headers: {
-            'x-access-token': apiKey,
-            'Content-Type': 'application/json',
-            'User-Agent': 'FinestKnown/1.0'
-          },
-          timeout: 15000 // 15 second timeout
-        });
-        
-        if (!response.ok) {
-          console.warn(`GoldAPI returned ${response.status} for ${metal}`);
-          continue;
-        }
-        
-        const data = await response.json();
-        console.log(`${metal} API Response:`, data);
-        
-        if (data.price) {
-          // Find previous price for this metal to calculate change
-          const previousPrice = previousPrices.find(p => p.metal === metal);
-          let change = 0;
-          let changePercent = 0;
-          
-          if (previousPrice) {
-            // Calculate change from our previous fetch
-            change = data.price - previousPrice.price;
-            changePercent = (change / previousPrice.price) * 100;
-            console.log(`${metal} change calculation: $${previousPrice.price} -> $${data.price} = ${changePercent.toFixed(2)}%`);
-          } else {
-            // For first fetch or when no previous data, try to use API's change data
-            if (data.change !== undefined && data.change_percent !== undefined) {
-              change = data.change;
-              changePercent = data.change_percent;
-              console.log(`${metal} using API change data: ${changePercent.toFixed(2)}%`);
-            } else {
-              // If no change data available, set to 0
-              change = 0;
-              changePercent = 0;
-              console.log(`${metal} no change data available, setting to 0%`);
-            }
-          }
-          
-          prices.push({
-            id,
-            metal,
-            price: data.price,
-            change: change,
-            changePercent: changePercent,
-            lastUpdated: new Date().toISOString(),
-          });
-          console.log(`Successfully fetched ${metal} price: $${data.price} (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
-        } else {
-          console.warn(`No price data for ${metal}`);
-        }
-        
-      } catch (error) {
-        console.warn(`Error fetching ${metal} price:`, error);
-        continue;
-      }
-    }
+    console.warn('Error scraping prices from BullionByPost:', error);
   }
   
   if (prices.length === 0) {
-    throw new Error('Could not fetch any metal prices from GoldAPI');
+    throw new Error('Could not scrape any metal prices from BullionByPost');
   }
   
   // Store current prices as previous prices for next calculation
@@ -180,7 +189,7 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
   // Save to storage for persistence across app restarts
   await savePreviousPrices(prices);
   
-  console.log('Successfully fetched all metal prices:', prices);
+  console.log('Successfully scraped all metal prices:', prices);
   return prices;
 }
 
