@@ -233,7 +233,9 @@ const styles = StyleSheet.create({
   },
   
   title: {
-    ...typography.title,
+    fontSize: typography.title.fontSize,
+    lineHeight: typography.title.lineHeight,
+    fontWeight: typography.title.fontWeight,
     color: colors.text.primary,
   },
   
@@ -259,7 +261,9 @@ const styles = StyleSheet.create({
   },
   
   filterText: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
     fontWeight: '600',
   },
@@ -301,7 +305,9 @@ const styles = StyleSheet.create({
   },
   
   statusText: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.inverse,
     fontWeight: '700',
     fontSize: 10,
@@ -312,13 +318,17 @@ const styles = StyleSheet.create({
   },
   
   auctionTitle: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.text.primary,
     marginBottom: spacing.sm,
   },
   
   auctionDescription: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
     marginBottom: spacing.lg,
   },
@@ -335,18 +345,24 @@ const styles = StyleSheet.create({
   },
   
   bidLabel: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
   },
   
   bidAmount: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.primary,
     fontWeight: '700',
   },
   
   startingBid: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.tertiary,
   },
   
@@ -364,7 +380,9 @@ const styles = StyleSheet.create({
   },
   
   timeText: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
     fontWeight: '600',
   },
@@ -376,7 +394,9 @@ const styles = StyleSheet.create({
   },
   
   bidCountText: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
   },
   

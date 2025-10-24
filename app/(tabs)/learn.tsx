@@ -253,7 +253,9 @@ const styles = StyleSheet.create({
   },
   
   title: {
-    ...typography.title,
+    fontSize: typography.title.fontSize,
+    lineHeight: typography.title.lineHeight,
+    fontWeight: typography.title.fontWeight,
     color: colors.text.primary,
   },
   
@@ -307,7 +309,9 @@ const styles = StyleSheet.create({
   },
   
   categoryText: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
     fontWeight: '600',
   },
@@ -321,7 +325,9 @@ const styles = StyleSheet.create({
   },
   
   sectionTitle: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.text.primary,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
@@ -369,7 +375,9 @@ const styles = StyleSheet.create({
   },
   
   featuredText: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.inverse,
     fontWeight: '700',
     fontSize: 10,
@@ -387,25 +395,33 @@ const styles = StyleSheet.create({
   },
   
   articleCategory: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.accent,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
   
   readTime: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.tertiary,
   },
   
   articleTitle: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.text.primary,
     marginBottom: spacing.sm,
   },
   
   articleExcerpt: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
     marginBottom: spacing.lg,
   },
@@ -417,13 +433,17 @@ const styles = StyleSheet.create({
   },
   
   articleAuthor: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
     fontWeight: '600',
   },
   
   articleDate: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.tertiary,
   },
   
@@ -435,14 +455,18 @@ const styles = StyleSheet.create({
   },
   
   emptyTitle: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.text.primary,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
   
   emptySubtitle: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
     textAlign: 'center',
   },

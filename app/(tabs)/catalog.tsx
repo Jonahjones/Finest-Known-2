@@ -229,7 +229,9 @@ const styles = StyleSheet.create({
   },
   
   categoryText: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
     fontWeight: '600',
   },
@@ -247,7 +249,9 @@ const styles = StyleSheet.create({
   },
   
   sortLabel: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
     fontWeight: '600',
   },
@@ -288,7 +292,9 @@ const styles = StyleSheet.create({
   },
   
   loadingText: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
   },
   
@@ -300,14 +306,18 @@ const styles = StyleSheet.create({
   },
   
   emptyTitle: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.text.primary,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
   
   emptySubtitle: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
     textAlign: 'center',
   },

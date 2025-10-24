@@ -232,12 +232,16 @@ const styles = StyleSheet.create({
   },
   
   title: {
-    ...typography.title,
+    fontSize: typography.title.fontSize,
+    lineHeight: typography.title.lineHeight,
+    fontWeight: typography.title.fontWeight,
     color: colors.text.primary,
   },
   
   clearText: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.error,
     fontWeight: '600',
   },
@@ -274,21 +278,27 @@ const styles = StyleSheet.create({
   },
   
   itemTitle: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.primary,
     fontWeight: '600',
     marginBottom: spacing.xs,
   },
   
   itemPrice: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.primary,
     fontWeight: '700',
     marginBottom: spacing.xs,
   },
   
   itemMetal: {
-    ...typography.caption,
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
+    fontWeight: typography.caption.fontWeight,
     color: colors.text.secondary,
     textTransform: 'uppercase',
     fontWeight: '600',
@@ -316,7 +326,9 @@ const styles = StyleSheet.create({
   },
   
   quantityText: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.primary,
     fontWeight: '600',
     marginHorizontal: spacing.sm,
@@ -347,12 +359,16 @@ const styles = StyleSheet.create({
   },
   
   summaryLabel: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
   },
   
   summaryValue: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.primary,
     fontWeight: '600',
   },
@@ -365,13 +381,17 @@ const styles = StyleSheet.create({
   },
   
   totalLabel: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.text.primary,
     fontWeight: '700',
   },
   
   totalValue: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.primary,
     fontWeight: '700',
   },
@@ -387,7 +407,9 @@ const styles = StyleSheet.create({
   },
   
   loadingText: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
   },
   
@@ -399,14 +421,18 @@ const styles = StyleSheet.create({
   },
   
   errorTitle: {
-    ...typography.heading,
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
     color: colors.text.primary,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
   
   errorMessage: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: spacing.lg,
@@ -424,14 +450,18 @@ const styles = StyleSheet.create({
   },
   
   emptyTitle: {
-    ...typography.title,
+    fontSize: typography.title.fontSize,
+    lineHeight: typography.title.lineHeight,
+    fontWeight: typography.title.fontWeight,
     color: colors.text.primary,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
   
   emptySubtitle: {
-    ...typography.body,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    fontWeight: typography.body.fontWeight,
     color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: spacing['2xl'],
