@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../src/components/ui/Card';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { colors } from '../../src/design/tokens';
+import { colors, spacing } from '../../src/design/tokens';
 
 // Mock article data - in real app, this would come from API
 const mockArticles = [
