@@ -12,9 +12,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../../src/hooks/useCart';
 import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
-import { colors, typography, spacing } from '../../src/design/tokens';
+import { useTheme } from '../../src/theme/ThemeProvider';
 
 export default function CartScreen() {
+  const { isLuxeTheme, tokens } = useTheme();
   const {
     cartItems,
     loading,

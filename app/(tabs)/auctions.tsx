@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
-import { colors, typography, spacing } from '../../src/design/tokens';
+import { useTheme } from '../../src/theme/ThemeProvider';
 
 // Mock auction data - in real app, this would come from API
 const mockAuctions = [
@@ -53,6 +53,7 @@ const mockAuctions = [
 export default function AuctionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'live' | 'ending'>('all');
+  const { isLuxeTheme, tokens } = useTheme();
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -71,21 +72,21 @@ export default function AuctionsScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'live':
-        return colors.success;
+        return isLuxeTheme ? tokens.colors.success : colors.success;
       case 'ending':
-        return colors.warning;
+        return isLuxeTheme ? tokens.colors.gold : colors.warning;
       case 'ended':
-        return colors.text.secondary;
+        return isLuxeTheme ? tokens.colors.muted : colors.text.secondary;
       default:
-        return colors.text.secondary;
+        return isLuxeTheme ? tokens.colors.muted : colors.text.secondary;
     }
   };
 
   const renderAuction = ({ item }: { item: any }) => (
-    <Card style={styles.auctionCard}>
+    <Card style={[styles.auctionCard, luxeStyles.auctionCard]}>
       <View style={styles.auctionImage}>
         <View style={styles.imagePlaceholder}>
-          <Ionicons name="image" size={48} color={colors.text.tertiary} />
+          <Ionicons name="image" size={48} color={isLuxeTheme ? tokens.colors.muted : colors.text.tertiary} />
         </View>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
           <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
@@ -93,25 +94,25 @@ export default function AuctionsScreen() {
       </View>
       
       <View style={styles.auctionContent}>
-        <Text style={styles.auctionTitle} numberOfLines={2}>
+        <Text style={[styles.auctionTitle, luxeStyles.auctionTitle]} numberOfLines={2}>
           {item.title}
         </Text>
         
-        <Text style={styles.auctionDescription} numberOfLines={2}>
+        <Text style={[styles.auctionDescription, luxeStyles.auctionDescription]} numberOfLines={2}>
           {item.description}
         </Text>
         
         <View style={styles.bidInfo}>
           <View style={styles.bidRow}>
-            <Text style={styles.bidLabel}>Current Bid</Text>
-            <Text style={styles.bidAmount}>
+            <Text style={[styles.bidLabel, luxeStyles.bidLabel]}>Current Bid</Text>
+            <Text style={[styles.bidAmount, luxeStyles.bidAmount]}>
               {formatPrice(item.currentBid)}
             </Text>
           </View>
           
           <View style={styles.bidRow}>
-            <Text style={styles.bidLabel}>Starting Bid</Text>
-            <Text style={styles.startingBid}>
+            <Text style={[styles.bidLabel, luxeStyles.bidLabel]}>Starting Bid</Text>
+            <Text style={[styles.startingBid, luxeStyles.startingBid]}>
               {formatPrice(item.startingBid)}
             </Text>
           </View>
@@ -119,13 +120,13 @@ export default function AuctionsScreen() {
         
         <View style={styles.auctionFooter}>
           <View style={styles.timeContainer}>
-            <Ionicons name="time" size={16} color={colors.text.secondary} />
-            <Text style={styles.timeText}>{item.timeLeft}</Text>
+            <Ionicons name="time" size={16} color={isLuxeTheme ? tokens.colors.muted : colors.text.secondary} />
+            <Text style={[styles.timeText, luxeStyles.timeText]}>{item.timeLeft}</Text>
           </View>
           
           <View style={styles.bidCountContainer}>
-            <Ionicons name="people" size={16} color={colors.text.secondary} />
-            <Text style={styles.bidCountText}>{item.bidCount} bids</Text>
+            <Ionicons name="people" size={16} color={isLuxeTheme ? tokens.colors.muted : colors.text.secondary} />
+            <Text style={[styles.bidCountText, luxeStyles.bidCountText]}>{item.bidCount} bids</Text>
           </View>
         </View>
         
@@ -142,25 +143,57 @@ export default function AuctionsScreen() {
     <TouchableOpacity
       style={[
         styles.filterButton,
-        selectedFilter === filter && styles.selectedFilter
+        luxeStyles.filterButton,
+        selectedFilter === filter && [styles.selectedFilter, luxeStyles.selectedFilter]
       ]}
       onPress={() => setSelectedFilter(filter)}
     >
       <Text style={[
         styles.filterText,
-        selectedFilter === filter && styles.selectedFilterText
+        luxeStyles.filterText,
+        selectedFilter === filter && [styles.selectedFilterText, luxeStyles.selectedFilterText]
       ]}>
         {label}
       </Text>
     </TouchableOpacity>
   );
 
+  const luxeStyles = isLuxeTheme ? {
+    container: { backgroundColor: tokens.colors.bg },
+    header: { backgroundColor: tokens.colors.bgElev },
+    title: { color: tokens.colors.text, fontFamily: tokens.typography.display },
+    filterButton: { 
+      backgroundColor: tokens.colors.surface,
+      borderColor: tokens.colors.line,
+      borderWidth: 1,
+    },
+    selectedFilter: { 
+      backgroundColor: tokens.colors.gold,
+      borderColor: tokens.colors.gold,
+    },
+    filterText: { color: tokens.colors.text },
+    selectedFilterText: { color: tokens.colors.bg },
+    auctionCard: { 
+      backgroundColor: tokens.colors.bgElev,
+      borderColor: tokens.colors.line,
+      borderWidth: 1,
+      ...tokens.shadows.luxe1
+    },
+    auctionTitle: { color: tokens.colors.text },
+    auctionDescription: { color: tokens.colors.muted },
+    bidLabel: { color: tokens.colors.muted },
+    bidAmount: { color: tokens.colors.text },
+    startingBid: { color: tokens.colors.muted },
+    timeText: { color: tokens.colors.muted },
+    bidCountText: { color: tokens.colors.muted },
+  } : {};
+
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Live Auctions</Text>
+    <SafeAreaView style={[styles.container, luxeStyles.container]} edges={['bottom']}>
+      <View style={[styles.header, luxeStyles.header]}>
+        <Text style={[styles.title, luxeStyles.title]}>Live Auctions</Text>
         <TouchableOpacity>
-          <Ionicons name="search" size={24} color={colors.text.primary} />
+          <Ionicons name="search" size={24} color={isLuxeTheme ? tokens.colors.text : colors.text.primary} />
         </TouchableOpacity>
       </View>
 
