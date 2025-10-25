@@ -13,7 +13,7 @@ import { useAuth } from '../../src/store/AuthContext';
 
 export default function HomeScreen() {
   const { isLuxeTheme, tokens } = useTheme();
-  const { user, session, loading } = useAuth();
+  const { user, session, loading, checkSession } = useAuth();
 
   return (
     <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
@@ -43,6 +43,14 @@ export default function HomeScreen() {
           <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
             User ID: {user?.id || 'N/A'}
           </Text>
+          <TouchableOpacity 
+            style={[styles.checkSessionButton, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}
+            onPress={checkSession}
+          >
+            <Text style={[styles.checkSessionButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+              Check Session
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Live Prices Ticker is now at the top of the app */}
@@ -151,6 +159,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 4,
+  },
+  checkSessionButton: {
+    backgroundColor: '#00D4AA',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    marginTop: 10,
+    alignSelf: 'center',
+  },
+  checkSessionButtonText: {
+    color: '#000',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   logo: {
     fontSize: 24,

@@ -11,6 +11,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  checkSession: () => Promise<{ session: Session | null; error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,19 +43,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('AuthContext: All AsyncStorage keys:', keys?.filter(k => k.includes('supabase') || k.includes('auth')));
     });
     
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('AuthContext: Initial session check:', { 
-        session: !!session, 
-        user: !!session?.user, 
-        userId: session?.user?.id,
-        accessToken: session?.access_token ? 'present' : 'missing',
-        error 
-      });
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Initialize auth state
+    const initializeAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('AuthContext: Initial session check:', { 
+          session: !!session, 
+          user: !!session?.user, 
+          userId: session?.user?.id,
+          accessToken: session?.access_token ? 'present' : 'missing',
+          error 
+        });
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        
+        // If no session, try to refresh
+        if (!session && !error) {
+          console.log('AuthContext: No session found, attempting refresh...');
+          const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshedSession) {
+            console.log('AuthContext: Session refreshed successfully');
+            setSession(refreshedSession);
+            setUser(refreshedSession.user);
+          } else {
+            console.log('AuthContext: Refresh failed:', refreshError);
+          }
+        }
+      } catch (err) {
+        console.error('AuthContext: Initialization error:', err);
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
@@ -82,6 +106,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     console.log('AuthContext: signUp result:', { user: !!data.user, session: !!data.session, error });
+    
+    // If successful, ensure session is properly set
+    if (data.session && data.user) {
+      console.log('AuthContext: Setting session after signup');
+      setSession(data.session);
+      setUser(data.user);
+    }
+    
     return { data, error };
   };
 
@@ -92,11 +124,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     console.log('AuthContext: signIn result:', { user: !!data.user, session: !!data.session, error });
+    
+    // If successful, ensure session is properly set
+    if (data.session && data.user) {
+      console.log('AuthContext: Setting session after signin');
+      setSession(data.session);
+      setUser(data.user);
+    }
+    
     return { data, error };
   };
 
   const signOut = async () => {
+    console.log('AuthContext: Signing out...');
     await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
+  };
+
+  const checkSession = async () => {
+    console.log('AuthContext: Manual session check...');
+    const { data: { session }, error } = await supabase.auth.getSession();
+    console.log('AuthContext: Manual session check result:', { 
+      session: !!session, 
+      user: !!session?.user, 
+      userId: session?.user?.id,
+      error 
+    });
+    setSession(session);
+    setUser(session?.user ?? null);
+    return { session, error };
   };
 
   const resetPassword = async (email: string) => {
@@ -112,6 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signOut,
     resetPassword,
+    checkSession,
   };
 
   return (
