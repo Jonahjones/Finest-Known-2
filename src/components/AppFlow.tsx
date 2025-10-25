@@ -10,7 +10,7 @@ export function AppFlow() {
   const [showConversionModal, setShowConversionModal] = useState(false);
   const [conversionAction, setConversionAction] = useState<'save' | 'bid' | 'checkout'>('save');
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const { user, session, loading: authLoading } = useAuth();
+  const { user, session, loading: authLoading, checkSession } = useAuth();
   const { isCompleted, isSkipped, persona, startOnboarding } = useOnboardingStore();
 
   // Show onboarding for authenticated users who haven't completed it
@@ -28,12 +28,25 @@ export function AppFlow() {
     }
   }, [user, isCompleted, isSkipped, startOnboarding]);
 
-  const handleOnboardingComplete = (assignedPersona: string) => {
+  const handleOnboardingComplete = async (assignedPersona: string) => {
     console.log('Onboarding completed with persona:', assignedPersona);
     console.log('User authenticated:', !!user);
     console.log('User ID:', user?.id);
     console.log('Session exists:', !!session);
     console.log('Auth loading:', authLoading);
+    
+    // Force a session check after onboarding completion
+    console.log('Forcing session check after onboarding completion...');
+    if (checkSession) {
+      const { session: checkedSession, error } = await checkSession();
+      console.log('Session check result:', { session: !!checkedSession, error });
+    }
+    
+    // Add a small delay to ensure session state propagates
+    setTimeout(() => {
+      console.log('Delayed session check - User:', !!user, 'Session:', !!session);
+    }, 1000);
+    
     // Analytics: onboarding_complete
     // Analytics: persona_assigned
   };
@@ -101,6 +114,17 @@ export function AppFlow() {
   // For authenticated users who have completed onboarding, show the main app tabs
   // For unauthenticated users, show the main app tabs (they'll see the landing page)
   // The tabs will handle showing the appropriate content
+  
+  // Debug: Log the final state before returning
+  console.log('AppFlow: Final state before returning null:', {
+    user: !!user,
+    userId: user?.id,
+    session: !!session,
+    isCompleted,
+    isSkipped,
+    shouldShowOnboarding
+  });
+  
   return null; // Let the Stack navigation handle the main app
 }
 
