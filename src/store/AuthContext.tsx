@@ -23,9 +23,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('AuthContext: Initializing auth state...');
     
-    // Check what's in AsyncStorage
-    AsyncStorage.getItem('sb-rhwuncdxjlzmsgiprdkz-auth-token').then((stored) => {
-      console.log('AuthContext: AsyncStorage content:', stored ? 'present' : 'empty');
+    // Check what's in AsyncStorage - try different possible keys
+    const possibleKeys = [
+      'sb-rhwuncdxjlzmsgiprdkz-auth-token',
+      'supabase.auth.token',
+      'sb-rhwuncdxjlzmsgiprdkz-auth-token-code-verifier',
+      'sb-rhwuncdxjlzmsgiprdkz-auth-token-code-challenge'
+    ];
+    
+    possibleKeys.forEach(key => {
+      AsyncStorage.getItem(key).then((stored) => {
+        console.log(`AuthContext: AsyncStorage [${key}]:`, stored ? 'present' : 'empty');
+      });
+    });
+    
+    // Also check all keys
+    AsyncStorage.getAllKeys().then((keys) => {
+      console.log('AuthContext: All AsyncStorage keys:', keys?.filter(k => k.includes('supabase') || k.includes('auth')));
     });
     
     // Get initial session
