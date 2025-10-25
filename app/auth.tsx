@@ -115,10 +115,11 @@ export default function AuthScreen() {
           console.log('Session after signup:', signUpData.session);
           // Reset onboarding state for new user
           resetOnboarding();
-          // Small delay to allow auth state to propagate
+          // Wait for auth state to propagate before navigating
           setTimeout(() => {
+            console.log('Navigating to tabs after signup...');
             router.replace('/(tabs)');
-          }, 100);
+          }, 500);
         }
       } else {
         console.log('Sign in successful:', signInData);
@@ -126,10 +127,11 @@ export default function AuthScreen() {
         console.log('Session after signin:', signInData.session);
         // Reset onboarding state to ensure quiz shows for existing users
         resetOnboarding();
-        // Small delay to allow auth state to propagate
+        // Wait for auth state to propagate before navigating
         setTimeout(() => {
+          console.log('Navigating to tabs after signin...');
           router.replace('/(tabs)');
-        }, 100);
+        }, 500);
       }
     } catch (error) {
       console.error('Test SSO error:', error);
