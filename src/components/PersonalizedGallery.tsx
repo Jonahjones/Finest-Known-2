@@ -118,7 +118,11 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           borderWidth: 1,
         }
       ]}
-      onPress={() => onItemPress(product)}
+      onPress={() => {
+        console.log('PersonalizedGallery: Product card pressed:', product.title);
+        onItemPress(product);
+      }}
+      activeOpacity={0.7}
     >
       <View style={styles.productImageContainer}>
         {product.primary_image_url ? (

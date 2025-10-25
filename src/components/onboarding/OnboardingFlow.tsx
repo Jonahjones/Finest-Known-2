@@ -137,7 +137,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   const handleItemPress = (item: any) => {
     // Navigate to item detail page
     console.log('Item pressed:', item);
-    // TODO: Implement navigation to item detail
+    router.push(`/item/${item.id}`);
   };
 
   const handleContinue = async () => {
