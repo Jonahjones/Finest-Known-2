@@ -299,7 +299,6 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           
           {products.length > 0 ? (
             <View style={styles.productsGrid}>
-              {console.log('PersonalizedGallery: Rendering', products.length, 'products')}
               {products.map(renderProductCard)}
             </View>
           ) : (
