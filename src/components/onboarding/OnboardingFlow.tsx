@@ -140,11 +140,18 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
     // TODO: Implement navigation to item detail
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // Complete onboarding and navigate to main app
     // The user should remain logged in throughout this flow
     console.log('Onboarding completed, navigating to main app');
-    completeOnboarding(); // Now complete the onboarding
+    
+    // Complete the onboarding first
+    completeOnboarding();
+    
+    // Add a small delay to ensure onboarding state is saved
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Then call onComplete
     onComplete(persona || 'explorer');
   };
 

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { PersonaType, PERSONA_CONFIGS } from '../store/onboardingStore';
 import { useTheme } from '../theme/ThemeProvider';
+import { useAuth } from '../store/AuthContext';
 import { supabase } from '../lib/supabase';
 
 interface Product {
@@ -38,8 +39,18 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { isLuxeTheme, tokens } = useTheme();
+  const { user, session, loading: authLoading } = useAuth();
   
   const personaConfig = PERSONA_CONFIGS[persona];
+  
+  // Debug authentication state
+  console.log('PersonalizedGallery: Auth state:', {
+    user: !!user,
+    userId: user?.id,
+    session: !!session,
+    authLoading,
+    persona
+  });
 
   useEffect(() => {
     fetchPersonalizedProducts();
@@ -166,6 +177,45 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
       </View>
     </TouchableOpacity>
   );
+
+  // Check if user is authenticated
+  if (!user || !session) {
+    return (
+      <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]}>
+        <View style={styles.loadingContainer}>
+          <Ionicons 
+            name="warning-outline" 
+            size={60} 
+            color={isLuxeTheme ? tokens.colors.gold : '#FF6B6B'} 
+          />
+          <Text 
+            style={[
+              styles.loadingText,
+              isLuxeTheme && { color: tokens.colors.text }
+            ]}
+          >
+            Authentication Error
+          </Text>
+          <Text 
+            style={[
+              styles.loadingText,
+              isLuxeTheme && { color: tokens.colors.muted }
+            ]}
+          >
+            You need to be logged in to see personalized recommendations.
+          </Text>
+          <TouchableOpacity 
+            style={[styles.continueButton, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}
+            onPress={onContinue}
+          >
+            <Text style={[styles.continueButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+              Continue to Marketplace
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (loading) {
     return (
