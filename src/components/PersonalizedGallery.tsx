@@ -143,63 +143,64 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
         activeOpacity={0.7}
         pointerEvents="auto"
       >
-      <View style={styles.productImageContainer}>
-        {product.primary_image_url ? (
-          <Image source={{ uri: product.primary_image_url }} style={styles.productImage} />
-        ) : (
-          <View style={[styles.productImagePlaceholder, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-            <Ionicons 
-              name="diamond-outline" 
-              size={32} 
-              color={isLuxeTheme ? tokens.colors.gold : '#6B7280'} 
-            />
-          </View>
-        )}
-      </View>
-      
-      <View style={styles.productInfo}>
-        <Text 
-          style={[
-            styles.productTitle,
-            isLuxeTheme && { color: tokens.colors.text }
-          ]}
-          numberOfLines={2}
-        >
-          {product.title}
-        </Text>
+        <View style={styles.productImageContainer}>
+          {product.primary_image_url ? (
+            <Image source={{ uri: product.primary_image_url }} style={styles.productImage} />
+          ) : (
+            <View style={[styles.productImagePlaceholder, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+              <Ionicons 
+                name="diamond-outline" 
+                size={32} 
+                color={isLuxeTheme ? tokens.colors.gold : '#6B7280'} 
+              />
+            </View>
+          )}
+        </View>
         
-        <Text 
-          style={[
-            styles.productPrice,
-            isLuxeTheme && { color: tokens.colors.gold }
-          ]}
-        >
-          {formatPrice(product.retail_price_cents)}
-        </Text>
-        
-        <View style={styles.productMeta}>
+        <View style={styles.productInfo}>
           <Text 
             style={[
-              styles.productMetal,
-              isLuxeTheme && { color: tokens.colors.muted }
+              styles.productTitle,
+              isLuxeTheme && { color: tokens.colors.text }
+            ]}
+            numberOfLines={2}
+          >
+            {product.title}
+          </Text>
+          
+          <Text 
+            style={[
+              styles.productPrice,
+              isLuxeTheme && { color: tokens.colors.gold }
             ]}
           >
-            {product.metal_type} • {product.weight_grams}g
+            {formatPrice(product.retail_price_cents)}
           </Text>
-          {product.year && (
+          
+          <View style={styles.productMeta}>
             <Text 
               style={[
-                styles.productYear,
+                styles.productMetal,
                 isLuxeTheme && { color: tokens.colors.muted }
               ]}
             >
-              {product.year}
+              {product.metal_type} • {product.weight_grams}g
             </Text>
-          )}
+            {product.year && (
+              <Text 
+                style={[
+                  styles.productYear,
+                  isLuxeTheme && { color: tokens.colors.muted }
+                ]}
+              >
+                {product.year}
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   // Check if user is authenticated
   if (!user || !session) {
@@ -281,7 +282,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
                 isLuxeTheme && { color: tokens.colors.muted }
               ]}
             >
-              {personaConfig.description}
+              Based on your preferences, here are some items we think you'll love.
             </Text>
           </View>
         </View>
