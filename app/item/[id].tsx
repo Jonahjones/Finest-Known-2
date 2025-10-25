@@ -16,7 +16,7 @@ interface Product {
   weight_grams: number;
   year?: number;
   primary_image_url: string;
-  category: string;
+  category_id: string;
 }
 
 export default function ItemDetailScreen() {

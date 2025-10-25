@@ -24,10 +24,11 @@ interface Product {
   primary_image_url: string;
   metal_type: string;
   weight_grams: number;
-  year: number;
-  mint: string;
-  condition: string;
+  year?: number;
+  mint?: string;
+  condition?: string;
   persona_tags: string[];
+  category_id: string;
 }
 
 interface PersonalizedGalleryProps {
