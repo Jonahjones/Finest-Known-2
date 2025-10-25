@@ -123,10 +123,11 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
         ]}
         onPress={() => {
           console.log('PersonalizedGallery: Product card pressed:', product.title, 'ID:', product.id);
-          console.log('PersonalizedGallery: Attempting direct navigation to:', `/item/${product.id}`);
+          const navigationUrl = `/item/${product.id}`;
+          console.log('PersonalizedGallery: Attempting direct navigation to:', navigationUrl);
           try {
             // Try direct navigation first
-            router.push(`/item/${product.id}`);
+            router.push(navigationUrl);
             console.log('PersonalizedGallery: Direct navigation successful');
           } catch (error) {
             console.error('PersonalizedGallery: Direct navigation failed:', error);
