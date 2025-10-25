@@ -9,9 +9,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme/ThemeProvider';
+import { useAuth } from '../../src/store/AuthContext';
 
 export default function HomeScreen() {
   const { isLuxeTheme, tokens } = useTheme();
+  const { user, session, loading } = useAuth();
 
   return (
     <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
@@ -22,6 +24,25 @@ export default function HomeScreen() {
           <TouchableOpacity>
             <Ionicons name="search" size={24} color={isLuxeTheme ? tokens.colors.text : "#000"} />
           </TouchableOpacity>
+        </View>
+
+        {/* Debug Auth Status */}
+        <View style={[styles.debugSection, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+          <Text style={[styles.debugTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+            Auth Status (Debug)
+          </Text>
+          <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
+            Loading: {loading ? 'Yes' : 'No'}
+          </Text>
+          <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
+            User: {user ? 'Logged In' : 'Not Logged In'}
+          </Text>
+          <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
+            Session: {session ? 'Active' : 'No Session'}
+          </Text>
+          <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
+            User ID: {user?.id || 'N/A'}
+          </Text>
         </View>
 
         {/* Live Prices Ticker is now at the top of the app */}
@@ -111,6 +132,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
+  },
+  debugSection: {
+    margin: 20,
+    padding: 16,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  debugTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  debugText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
   logo: {
     fontSize: 24,
