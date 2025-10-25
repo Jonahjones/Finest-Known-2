@@ -67,19 +67,31 @@ export default function ItemDetailScreen() {
   const handleAddToCart = () => {
     if (!user) {
       Alert.alert('Login Required', 'Please log in to add items to your cart.');
+      router.push('/auth?mode=signin');
       return;
     }
     
     Alert.alert('Added to Cart', `${product?.title} has been added to your cart!`);
   };
 
-  const handleMakeOffer = () => {
+  const handlePurchaseNow = () => {
     if (!user) {
-      Alert.alert('Login Required', 'Please log in to make offers.');
+      Alert.alert('Login Required', 'Please log in to purchase items.');
+      router.push('/auth?mode=signin');
       return;
     }
     
-    Alert.alert('Make Offer', `Offer functionality for ${product?.title} will be implemented soon!`);
+    Alert.alert('Purchase Now', `Purchase functionality for ${product?.title} will be implemented soon!`);
+  };
+
+  const handleAddToWishlist = () => {
+    if (!user) {
+      Alert.alert('Login Required', 'Please create an account to add items to your wishlist.');
+      router.push('/auth?mode=signup');
+      return;
+    }
+    
+    Alert.alert('Added to Wishlist', `${product?.title} has been added to your wishlist!`);
   };
 
   if (loading) {
@@ -117,8 +129,8 @@ export default function ItemDetailScreen() {
           <Text style={[styles.headerTitle, isLuxeTheme && { color: tokens.colors.text }]}>
             Item Details
           </Text>
-          <TouchableOpacity>
-            <Ionicons name="heart-outline" size={24} color={isLuxeTheme ? tokens.colors.text : "#000"} />
+          <TouchableOpacity onPress={handleAddToWishlist}>
+            <Ionicons name="heart-outline" size={24} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
           </TouchableOpacity>
         </View>
 
@@ -176,12 +188,25 @@ export default function ItemDetailScreen() {
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.makeOfferButton, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.gold }]}
-            onPress={handleMakeOffer}
+            style={[styles.purchaseNowButton, isLuxeTheme && { backgroundColor: tokens.colors.success }]}
+            onPress={handlePurchaseNow}
           >
-            <Ionicons name="hand-left-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
-            <Text style={[styles.buttonText, isLuxeTheme && { color: tokens.colors.gold }]}>
-              Make Offer
+            <Ionicons name="card-outline" size={20} color={isLuxeTheme ? tokens.colors.bg : "#FFFFFF"} />
+            <Text style={[styles.buttonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+              Purchase Now
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Wishlist Button */}
+        <View style={styles.wishlistContainer}>
+          <TouchableOpacity 
+            style={[styles.wishlistButton, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.gold }]}
+            onPress={handleAddToWishlist}
+          >
+            <Ionicons name="heart-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
+            <Text style={[styles.wishlistButtonText, isLuxeTheme && { color: tokens.colors.gold }]}>
+              Add to Wishlist
             </Text>
           </TouchableOpacity>
         </View>
@@ -289,8 +314,27 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 8,
   },
-  makeOfferButton: {
+  purchaseNowButton: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#32C36A',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    gap: 8,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  wishlistContainer: {
+    padding: 20,
+    paddingTop: 0,
+  },
+  wishlistButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -302,9 +346,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 8,
   },
-  buttonText: {
+  wishlistButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#00D4AA',
   },
 });
