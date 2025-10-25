@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   user: User | null;
@@ -22,9 +23,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('AuthContext: Initializing auth state...');
     
+    // Check what's in AsyncStorage
+    AsyncStorage.getItem('sb-rhwuncdxjlzmsgiprdkz-auth-token').then((stored) => {
+      console.log('AuthContext: AsyncStorage content:', stored ? 'present' : 'empty');
+    });
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('AuthContext: Initial session check:', { session: !!session, user: !!session?.user, error });
+      console.log('AuthContext: Initial session check:', { 
+        session: !!session, 
+        user: !!session?.user, 
+        userId: session?.user?.id,
+        accessToken: session?.access_token ? 'present' : 'missing',
+        error 
+      });
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -34,7 +46,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('AuthContext: Auth state change:', { event, session: !!session, user: !!session?.user });
+      console.log('AuthContext: Auth state change:', { 
+        event, 
+        session: !!session, 
+        user: !!session?.user,
+        userId: session?.user?.id,
+        accessToken: session?.access_token ? 'present' : 'missing'
+      });
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
