@@ -67,6 +67,8 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           persona_tags
         `)
         .eq('is_active', true)
+        .not('primary_image_url', 'is', null)
+        .neq('primary_image_url', '')
         .contains('persona_tags', [persona])
         .limit(12);
 
@@ -202,14 +204,6 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
             </Text>
             <Text 
               style={[
-                styles.personaTitle,
-                isLuxeTheme && { color: tokens.colors.gold }
-              ]}
-            >
-              {personaConfig.name}
-            </Text>
-            <Text 
-              style={[
                 styles.personaDescription,
                 isLuxeTheme && { color: tokens.colors.muted }
               ]}
@@ -326,13 +320,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#000000',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  personaTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#00D4AA',
     textAlign: 'center',
     marginBottom: 8,
   },
