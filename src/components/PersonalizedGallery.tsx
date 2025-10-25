@@ -123,11 +123,19 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
         ]}
         onPress={() => {
           console.log('PersonalizedGallery: Product card pressed:', product.title, 'ID:', product.id);
-          console.log('PersonalizedGallery: onItemPress function:', typeof onItemPress);
+          console.log('PersonalizedGallery: Attempting direct navigation to:', `/item/${product.id}`);
           try {
-            onItemPress(product);
+            // Try direct navigation first
+            router.push(`/item/${product.id}`);
+            console.log('PersonalizedGallery: Direct navigation successful');
           } catch (error) {
-            console.error('PersonalizedGallery: Error calling onItemPress:', error);
+            console.error('PersonalizedGallery: Direct navigation failed:', error);
+            // Fallback to onItemPress
+            try {
+              onItemPress(product);
+            } catch (fallbackError) {
+              console.error('PersonalizedGallery: onItemPress also failed:', fallbackError);
+            }
           }
         }}
         activeOpacity={0.7}
@@ -360,7 +368,8 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
             ]}
             onPress={() => {
               console.log('Test navigation button pressed');
-              router.push('/item/test-product-id');
+              // Use a real product ID from the database
+              router.push('/item/f605d4b0-e6f2-4610-8bd2-77380995f19b');
             }}
           >
             <Text 
