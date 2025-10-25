@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -184,7 +184,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
               isLuxeTheme && { color: tokens.colors.muted }
             ]}
           >
-            {product.metal_type} â€¢ {product.weight_grams}g
+            {product.metal_type} • {product.weight_grams}g
           </Text>
           {product.year && (
             <Text 
