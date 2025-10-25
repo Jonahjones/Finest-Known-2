@@ -11,8 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { QuestionCard } from './QuestionCard';
 import { PersonalizedGallery } from '../PersonalizedGallery';
-import { useOnboardingStore } from '../../store/onboardingStore';
-import { PERSONA_CONFIGS } from '../../store/onboardingStore';
+import { useOnboardingStore, PERSONA_CONFIGS, calculatePersona } from '../../store/onboardingStore';
 
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -109,16 +108,22 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
     setAnswers(newAnswers);
     answerQuestion(questionId, answerId);
     
+    // Check if this is the last question based on question ID
+    const isLastQuestion = questionId === 'q5';
+    console.log('Question check:', { questionId, isLastQuestion });
+    
     // Auto-advance after answering
     setTimeout(() => {
-      console.log('Auto-advance check:', { currentStep, isLastQuestion: currentStep >= ONBOARDING_QUESTIONS.length - 1 });
-      if (currentStep < ONBOARDING_QUESTIONS.length - 1) {
-        console.log('Moving to next question');
+      if (!isLastQuestion) {
+        console.log('Moving to next question from:', currentStep);
         setCurrentStep(currentStep + 1);
         nextStep();
       } else {
         console.log('Quiz completed - showing results screen');
         // Quiz completed - show results screen
+        // Calculate persona immediately from current answers
+        const calculatedPersona = calculatePersona(newAnswers);
+        console.log('Calculated persona from answers:', calculatedPersona);
         setShowResults(true);
       }
     }, 300);
@@ -154,6 +159,11 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
         onContinue={handleContinue}
       />
     );
+  }
+
+  // Debug: Check if we should show results but persona is missing
+  if (showResults && !persona) {
+    console.log('showResults is true but persona is missing:', { showResults, persona, answers });
   }
 
   console.log('OnboardingFlow - showResults:', showResults, 'persona:', persona, 'currentStep:', currentStep);
