@@ -150,20 +150,53 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
 
 
   // Show results screen after quiz completion
-  if (showResults && persona) {
-    console.log('Showing PersonalizedGallery for persona:', persona);
-    return (
-      <PersonalizedGallery
-        persona={persona}
-        onItemPress={handleItemPress}
-        onContinue={handleContinue}
-      />
-    );
+  if (showResults) {
+    console.log('showResults is true, checking persona:', { showResults, persona, answers });
+    
+    if (persona) {
+      console.log('Showing PersonalizedGallery for persona:', persona);
+      return (
+        <PersonalizedGallery
+          persona={persona}
+          onItemPress={handleItemPress}
+          onContinue={handleContinue}
+        />
+      );
+    } else {
+      console.log('showResults is true but persona is missing, calculating manually...');
+      // Calculate persona manually if store doesn't have it
+      const manualPersona = calculatePersona(answers);
+      console.log('Manual persona calculation:', manualPersona);
+      
+      return (
+        <PersonalizedGallery
+          persona={manualPersona}
+          onItemPress={handleItemPress}
+          onContinue={handleContinue}
+        />
+      );
+    }
   }
 
-  // Debug: Check if we should show results but persona is missing
-  if (showResults && !persona) {
-    console.log('showResults is true but persona is missing:', { showResults, persona, answers });
+  // Fallback: If showResults is true but PersonalizedGallery fails, show simple results
+  if (showResults) {
+    console.log('Fallback: Showing simple results screen');
+    return (
+      <View style={styles.questionContainer}>
+        <View style={styles.questionBackground}>
+          <SafeAreaView style={styles.questionContent}>
+            <Text style={styles.question}>Quiz Completed!</Text>
+            <Text style={styles.optionText}>You've completed the onboarding quiz.</Text>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={handleContinue}
+            >
+              <Text style={styles.optionText}>Continue to App</Text>
+            </TouchableOpacity>
+          </SafeAreaView>
+        </View>
+      </View>
+    );
   }
 
   console.log('OnboardingFlow - showResults:', showResults, 'persona:', persona, 'currentStep:', currentStep);
