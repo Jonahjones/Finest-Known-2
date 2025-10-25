@@ -12,6 +12,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   checkSession: () => Promise<{ session: Session | null; error: any }>;
+  forceSessionRestore: () => Promise<{ session: Session | null; error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -156,6 +157,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { session, error };
   };
 
+  const forceSessionRestore = async () => {
+    console.log('AuthContext: Force session restore...');
+    try {
+      // Clear current state
+      setSession(null);
+      setUser(null);
+      
+      // Wait a moment
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Force get session
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log('AuthContext: Force restore result:', { 
+        session: !!session, 
+        user: !!session?.user, 
+        userId: session?.user?.id,
+        error 
+      });
+      
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      return { session, error };
+    } catch (err) {
+      console.error('AuthContext: Force restore error:', err);
+      return { session: null, error: err };
+    }
+  };
+
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     if (error) throw error;
@@ -170,6 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     resetPassword,
     checkSession,
+    forceSessionRestore,
   };
 
   return (

@@ -13,7 +13,7 @@ import { useAuth } from '../../src/store/AuthContext';
 
 export default function HomeScreen() {
   const { isLuxeTheme, tokens } = useTheme();
-  const { user, session, loading, checkSession } = useAuth();
+  const { user, session, loading, checkSession, forceSessionRestore } = useAuth();
 
   return (
     <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
@@ -49,6 +49,14 @@ export default function HomeScreen() {
           >
             <Text style={[styles.checkSessionButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
               Check Session
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.checkSessionButton, isLuxeTheme && { backgroundColor: tokens.colors.gold, marginTop: 8 }]}
+            onPress={forceSessionRestore}
+          >
+            <Text style={[styles.checkSessionButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+              Force Restore Session
             </Text>
           </TouchableOpacity>
         </View>
