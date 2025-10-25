@@ -10,7 +10,7 @@ export function AppFlow() {
   const [showConversionModal, setShowConversionModal] = useState(false);
   const [conversionAction, setConversionAction] = useState<'save' | 'bid' | 'checkout'>('save');
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const { user, loading: authLoading } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const { isCompleted, isSkipped, persona, startOnboarding } = useOnboardingStore();
 
   // Show onboarding for authenticated users who haven't completed it
@@ -32,6 +32,8 @@ export function AppFlow() {
     console.log('Onboarding completed with persona:', assignedPersona);
     console.log('User authenticated:', !!user);
     console.log('User ID:', user?.id);
+    console.log('Session exists:', !!session);
+    console.log('Auth loading:', authLoading);
     // Analytics: onboarding_complete
     // Analytics: persona_assigned
   };

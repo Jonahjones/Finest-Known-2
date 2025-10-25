@@ -111,17 +111,25 @@ export default function AuthScreen() {
           Alert.alert('Authentication Error', `Failed to create test account: ${signUpError.message}`);
         } else {
           console.log('Test account created successfully:', signUpData);
+          console.log('User after signup:', signUpData.user);
+          console.log('Session after signup:', signUpData.session);
           // Reset onboarding state for new user
           resetOnboarding();
-          // Don't show alert - let the natural flow handle navigation
-          router.replace('/(tabs)');
+          // Small delay to allow auth state to propagate
+          setTimeout(() => {
+            router.replace('/(tabs)');
+          }, 100);
         }
       } else {
         console.log('Sign in successful:', signInData);
+        console.log('User after signin:', signInData.user);
+        console.log('Session after signin:', signInData.session);
         // Reset onboarding state to ensure quiz shows for existing users
         resetOnboarding();
-        // Don't show alert - let the natural flow handle navigation
-        router.replace('/(tabs)');
+        // Small delay to allow auth state to propagate
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 100);
       }
     } catch (error) {
       console.error('Test SSO error:', error);
