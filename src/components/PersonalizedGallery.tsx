@@ -18,18 +18,14 @@ interface Product {
   id: string;
   title: string;
   description: string;
-  price_cents: number;
-  currency: string;
-  image_url: string;
-  category: string;
+  retail_price_cents: number;
+  primary_image_url: string;
   metal_type: string;
   weight_grams: number;
-  purity: string;
-  condition: string;
   year: number;
   mint: string;
-  country: string;
-  tags: string[];
+  condition: string;
+  persona_tags: string[];
 }
 
 interface PersonalizedGalleryProps {
@@ -53,19 +49,26 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
     try {
       setLoading(true);
       
-      // Get categories for this persona
-      const categories = personaConfig.categories;
+      console.log('Fetching products for persona:', persona);
       
       let query = supabase
         .from('products')
-        .select('*')
+        .select(`
+          id,
+          title,
+          description,
+          retail_price_cents,
+          primary_image_url,
+          metal_type,
+          weight_grams,
+          year,
+          mint,
+          condition,
+          persona_tags
+        `)
         .eq('is_active', true)
+        .contains('persona_tags', [persona])
         .limit(12);
-
-      // Filter by categories if not 'all'
-      if (!categories.includes('all')) {
-        query = query.in('category', categories);
-      }
 
       const { data, error } = await query;
 
@@ -73,6 +76,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
         console.error('Error fetching personalized products:', error);
         setProducts([]);
       } else {
+        console.log('Fetched products:', data?.length || 0);
         setProducts(data || []);
       }
     } catch (error) {
@@ -83,10 +87,10 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
     }
   };
 
-  const formatPrice = (priceCents: number, currency: string) => {
+  const formatPrice = (priceCents: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: currency || 'USD',
+      currency: 'USD',
     }).format(priceCents / 100);
   };
 
@@ -104,8 +108,8 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
       onPress={() => onItemPress(product)}
     >
       <View style={styles.productImageContainer}>
-        {product.image_url ? (
-          <Image source={{ uri: product.image_url }} style={styles.productImage} />
+        {product.primary_image_url ? (
+          <Image source={{ uri: product.primary_image_url }} style={styles.productImage} />
         ) : (
           <View style={[styles.productImagePlaceholder, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
             <Ionicons 
@@ -134,7 +138,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
             isLuxeTheme && { color: tokens.colors.gold }
           ]}
         >
-          {formatPrice(product.price_cents, product.currency)}
+          {formatPrice(product.retail_price_cents)}
         </Text>
         
         <View style={styles.productMeta}>
