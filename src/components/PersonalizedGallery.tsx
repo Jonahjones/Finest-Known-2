@@ -126,19 +126,20 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           console.log('PersonalizedGallery: Product card pressed:', product.title, 'ID:', product.id);
           const navigationUrl = `/item/${product.id}`;
           console.log('PersonalizedGallery: Attempting direct navigation to:', navigationUrl);
-          try {
-            // Try direct navigation first
-            router.push(navigationUrl);
-            console.log('PersonalizedGallery: Direct navigation successful');
-          } catch (error) {
-            console.error('PersonalizedGallery: Direct navigation failed:', error);
-            // Fallback to onItemPress
+          
+          // Complete onboarding first to remove the overlay
+          console.log('PersonalizedGallery: Completing onboarding before navigation');
+          onContinue(); // This will complete the onboarding and remove the overlay
+          
+          // Then navigate to the item page
+          setTimeout(() => {
             try {
-              onItemPress(product);
-            } catch (fallbackError) {
-              console.error('PersonalizedGallery: onItemPress also failed:', fallbackError);
+              router.push(navigationUrl);
+              console.log('PersonalizedGallery: Navigation successful after onboarding completion');
+            } catch (error) {
+              console.error('PersonalizedGallery: Navigation failed:', error);
             }
-          }
+          }, 200); // Small delay to ensure onboarding completion takes effect
         }}
         activeOpacity={0.7}
         pointerEvents="auto"

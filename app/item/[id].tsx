@@ -26,6 +26,8 @@ export default function ItemDetailScreen() {
   const [product, setProduct] = React.useState<Product | null>(null);
   const [loading, setLoading] = React.useState(true);
 
+  console.log('ItemDetailScreen: Component loaded with ID:', id);
+
   React.useEffect(() => {
     if (id) {
       fetchProduct();
@@ -33,6 +35,7 @@ export default function ItemDetailScreen() {
   }, [id]);
 
   const fetchProduct = async () => {
+    console.log('ItemDetailScreen: Fetching product with ID:', id);
     try {
       const { data, error } = await supabase
         .from('products')
@@ -41,13 +44,14 @@ export default function ItemDetailScreen() {
         .single();
 
       if (error) {
-        console.error('Error fetching product:', error);
+        console.error('ItemDetailScreen: Error fetching product:', error);
         return;
       }
 
+      console.log('ItemDetailScreen: Product fetched successfully:', data?.title);
       setProduct(data);
     } catch (err) {
-      console.error('Error fetching product:', err);
+      console.error('ItemDetailScreen: Error fetching product:', err);
     } finally {
       setLoading(false);
     }
