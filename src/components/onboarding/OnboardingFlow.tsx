@@ -115,7 +115,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
         nextStep();
       } else {
         // Quiz completed - show results screen
-        completeOnboarding();
+        // Don't call completeOnboarding() yet - wait until user continues
         setShowResults(true);
       }
     }, 300);
@@ -136,12 +136,14 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
     // Complete onboarding and navigate to main app
     // The user should remain logged in throughout this flow
     console.log('Onboarding completed, navigating to main app');
+    completeOnboarding(); // Now complete the onboarding
     onComplete(persona || 'explorer');
   };
 
 
   // Show results screen after quiz completion
   if (showResults && persona) {
+    console.log('Showing PersonalizedGallery for persona:', persona);
     return (
       <PersonalizedGallery
         persona={persona}
@@ -150,6 +152,8 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
       />
     );
   }
+
+  console.log('OnboardingFlow - showResults:', showResults, 'persona:', persona, 'currentStep:', currentStep);
 
   const currentQuestion = ONBOARDING_QUESTIONS[currentStep];
   
