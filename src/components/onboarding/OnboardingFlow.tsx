@@ -119,7 +119,6 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
       } else {
         console.log('Quiz completed - showing results screen');
         // Quiz completed - show results screen
-        // Don't call completeOnboarding() yet - wait until user continues
         setShowResults(true);
       }
     }, 300);
