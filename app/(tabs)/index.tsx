@@ -69,9 +69,21 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={[styles.header, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
           <Text style={[styles.logo, isLuxeTheme && { color: tokens.colors.text }]}>FinestKnown</Text>
-          <TouchableOpacity>
-            <Ionicons name="search" size={24} color={isLuxeTheme ? tokens.colors.text : "#000"} />
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            {user ? (
+              <View style={styles.userStatus}>
+                <Ionicons name="checkmark-circle" size={20} color={isLuxeTheme ? tokens.colors.success : "#32C36A"} />
+                <Text style={[styles.userStatusText, isLuxeTheme && { color: tokens.colors.success }]}>Logged In</Text>
+              </View>
+            ) : (
+              <TouchableOpacity onPress={() => router.push('/auth')}>
+                <Text style={[styles.loginButton, isLuxeTheme && { color: tokens.colors.gold }]}>Login</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity>
+              <Ionicons name="search" size={24} color={isLuxeTheme ? tokens.colors.text : "#000"} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Debug Auth Status */}
@@ -108,6 +120,18 @@ export default function HomeScreen() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Welcome Message for Logged-in Users */}
+        {user && (
+          <View style={[styles.welcomeSection, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line, borderWidth: 1 }]}>
+            <Text style={[styles.welcomeTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+              Welcome back!
+            </Text>
+            <Text style={[styles.welcomeSubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>
+              You're logged in and ready to explore premium precious metals
+            </Text>
+          </View>
+        )}
 
         {/* Live Prices Ticker is now at the top of the app */}
 
@@ -214,6 +238,45 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  userStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  userStatusText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#32C36A',
+  },
+  loginButton: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#00D4AA',
+  },
+  welcomeSection: {
+    margin: 20,
+    padding: 20,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  welcomeTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    lineHeight: 22,
   },
   debugSection: {
     margin: 20,
