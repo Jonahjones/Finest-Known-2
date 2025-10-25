@@ -134,6 +134,8 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
 
   const handleContinue = () => {
     // Complete onboarding and navigate to main app
+    // The user should remain logged in throughout this flow
+    console.log('Onboarding completed, navigating to main app');
     onComplete(persona || 'explorer');
   };
 

@@ -113,14 +113,14 @@ export default function AuthScreen() {
           console.log('Test account created successfully:', signUpData);
           // Reset onboarding state for new user
           resetOnboarding();
-          Alert.alert('Success', 'Test account created! You will now see the onboarding quiz.');
+          // Don't show alert - let the natural flow handle navigation
           router.replace('/(tabs)');
         }
       } else {
         console.log('Sign in successful:', signInData);
         // Reset onboarding state to ensure quiz shows for existing users
         resetOnboarding();
-        Alert.alert('Success', 'Signed in with test account! You will now see the onboarding quiz.');
+        // Don't show alert - let the natural flow handle navigation
         router.replace('/(tabs)');
       }
     } catch (error) {
