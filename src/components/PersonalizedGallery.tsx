@@ -528,12 +528,6 @@ const styles = StyleSheet.create({
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-  continueButton: {
-    backgroundColor: '#00D4AA',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
