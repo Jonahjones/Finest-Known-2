@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { getProducts, getCategories, searchProducts } from '../../src/api/products';
 import { ProductCard } from '../../src/components/ui/ProductCard';
 import { colors, spacing, typography } from '../../src/design/tokens';
@@ -61,13 +62,25 @@ export default function CatalogScreen() {
     setSortBy(sort);
   };
 
+  const handleProductPress = (product: any) => {
+    console.log('Catalog: Product pressed:', product.title, 'ID:', product.id);
+    const navigationUrl = `/item/${product.id}`;
+    console.log('Catalog: Navigating to:', navigationUrl);
+    try {
+      router.push(navigationUrl);
+      console.log('Catalog: Navigation successful');
+    } catch (error) {
+      console.error('Catalog: Navigation failed:', error);
+    }
+  };
+
   const displayProducts = searchQuery.length > 2 ? searchResults : products;
   const isLoading = searchQuery.length > 2 ? searchLoading : productsLoading;
 
   const renderProduct = ({ item }: { item: any }) => (
     <ProductCard
       product={item}
-      onPress={() => {}}
+      onPress={() => handleProductPress(item)}
       style={styles.productCard}
     />
   );

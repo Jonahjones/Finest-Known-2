@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
 import { useTheme } from '../../src/theme/ThemeProvider';
@@ -70,6 +71,18 @@ export default function AuctionsScreen() {
     }).format(cents / 100);
   };
 
+  const handleAuctionPress = (auction: any) => {
+    console.log('Auctions: Auction pressed:', auction.title, 'ID:', auction.id);
+    const navigationUrl = `/item/${auction.id}`;
+    console.log('Auctions: Navigating to:', navigationUrl);
+    try {
+      router.push(navigationUrl);
+      console.log('Auctions: Navigation successful');
+    } catch (error) {
+      console.error('Auctions: Navigation failed:', error);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'live':
@@ -84,7 +97,8 @@ export default function AuctionsScreen() {
   };
 
   const renderAuction = ({ item }: { item: any }) => (
-    <Card style={[styles.auctionCard, luxeStyles.auctionCard]}>
+    <TouchableOpacity onPress={() => handleAuctionPress(item)}>
+      <Card style={[styles.auctionCard, luxeStyles.auctionCard]}>
       <View style={styles.auctionImage}>
         <View style={styles.imagePlaceholder}>
           <Ionicons name="image" size={48} color={isLuxeTheme ? tokens.colors.muted : colors.text.tertiary} />
@@ -138,6 +152,7 @@ export default function AuctionsScreen() {
         />
       </View>
     </Card>
+    </TouchableOpacity>
   );
 
   const renderFilterButton = (filter: 'all' | 'live' | 'ending', label: string) => (
