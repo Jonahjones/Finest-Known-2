@@ -5,15 +5,63 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAuth } from '../../src/store/AuthContext';
+import { supabase } from '../../src/lib/supabase';
 
 export default function HomeScreen() {
   const { isLuxeTheme, tokens } = useTheme();
   const { user, session, loading, checkSession, forceSessionRestore } = useAuth();
+  const [featuredProducts, setFeaturedProducts] = React.useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = React.useState(true);
+
+  React.useEffect(() => {
+    fetchFeaturedProducts();
+  }, []);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, title, retail_price_cents, primary_image_url, metal_type, weight_grams')
+        .eq('is_active', true)
+        .not('primary_image_url', 'is', null)
+        .neq('primary_image_url', '')
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (error) {
+        console.error('Error fetching featured products:', error);
+        setFeaturedProducts([]);
+      } else {
+        console.log('Fetched featured products:', data?.length || 0);
+        setFeaturedProducts(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching featured products:', error);
+      setFeaturedProducts([]);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const formatPrice = (priceCents: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(priceCents / 100);
+  };
+
+  const handleProductPress = (product: any) => {
+    console.log('Home: Product pressed:', product.title, 'ID:', product.id);
+    router.push(`/item/${product.id}`);
+  };
 
   return (
     <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
@@ -67,34 +115,52 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>Featured Products</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/catalog')}>
               <Text style={[styles.viewAll, isLuxeTheme && { color: tokens.colors.gold }]}>View All</Text>
             </TouchableOpacity>
           </View>
           
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={[styles.productCard, isLuxeTheme && { backgroundColor: tokens.colors.bgElev, borderColor: tokens.colors.line, borderWidth: 1 }]}>
-              <View style={styles.productImage}>
-                <Text style={styles.productImageText}>Gold Eagle</Text>
-              </View>
-              <View style={styles.productInfo}>
-                <Text style={[styles.productTitle, isLuxeTheme && { color: tokens.colors.text }]}>2024 American Gold Eagle 1oz</Text>
-                <Text style={[styles.productPrice, isLuxeTheme && { color: tokens.colors.text }]}>$2,500.00</Text>
-                <Text style={[styles.productMetal, isLuxeTheme && { color: tokens.colors.muted }]}>Gold</Text>
-              </View>
+          {loadingProducts ? (
+            <View style={styles.loadingContainer}>
+              <Text style={[styles.loadingText, isLuxeTheme && { color: tokens.colors.muted }]}>Loading products...</Text>
             </View>
-            
-            <View style={[styles.productCard, isLuxeTheme && { backgroundColor: tokens.colors.bgElev, borderColor: tokens.colors.line, borderWidth: 1 }]}>
-              <View style={styles.productImage}>
-                <Text style={styles.productImageText}>Silver Maple</Text>
-              </View>
-              <View style={styles.productInfo}>
-                <Text style={[styles.productTitle, isLuxeTheme && { color: tokens.colors.text }]}>2023 Canadian Silver Maple Leaf 1oz</Text>
-                <Text style={[styles.productPrice, isLuxeTheme && { color: tokens.colors.text }]}>$35.00</Text>
-                <Text style={[styles.productMetal, isLuxeTheme && { color: tokens.colors.muted }]}>Silver</Text>
-              </View>
+          ) : featuredProducts.length > 0 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {featuredProducts.map((product) => (
+                <TouchableOpacity
+                  key={product.id}
+                  style={[styles.productCard, isLuxeTheme && { backgroundColor: tokens.colors.bgElev, borderColor: tokens.colors.line, borderWidth: 1 }]}
+                  onPress={() => handleProductPress(product)}
+                >
+                  <View style={styles.productImage}>
+                    {product.primary_image_url ? (
+                      <Image source={{ uri: product.primary_image_url }} style={styles.productImageContent} />
+                    ) : (
+                      <View style={styles.productImagePlaceholder}>
+                        <Ionicons name="diamond-outline" size={32} color={isLuxeTheme ? tokens.colors.muted : '#6B7280'} />
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.productInfo}>
+                    <Text style={[styles.productTitle, isLuxeTheme && { color: tokens.colors.text }]} numberOfLines={2}>
+                      {product.title}
+                    </Text>
+                    <Text style={[styles.productPrice, isLuxeTheme && { color: tokens.colors.gold }]}>
+                      {formatPrice(product.retail_price_cents)}
+                    </Text>
+                    <Text style={[styles.productMetal, isLuxeTheme && { color: tokens.colors.muted }]}>
+                      {product.metal_type} • {product.weight_grams}g
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="search-outline" size={48} color={isLuxeTheme ? tokens.colors.muted : '#6B7280'} />
+              <Text style={[styles.emptyText, isLuxeTheme && { color: tokens.colors.muted }]}>No featured products available</Text>
             </View>
-          </ScrollView>
+          )}
         </View>
 
         {/* Categories */}
@@ -228,6 +294,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     fontWeight: '600',
+  },
+  productImageContent: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  productImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginTop: 16,
+    textAlign: 'center',
   },
   productInfo: {
     padding: 16,
