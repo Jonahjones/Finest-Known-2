@@ -14,6 +14,7 @@ import { PersonaType, PERSONA_CONFIGS } from '../store/onboardingStore';
 import { useTheme } from '../theme/ThemeProvider';
 import { useAuth } from '../store/AuthContext';
 import { supabase } from '../lib/supabase';
+import { router } from 'expo-router';
 
 interface Product {
   id: string;
@@ -107,23 +108,31 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
     }).format(priceCents / 100);
   };
 
-  const renderProductCard = (product: Product) => (
-    <TouchableOpacity
-      key={product.id}
-      style={[
-        styles.productCard,
-        isLuxeTheme && {
-          backgroundColor: tokens.colors.surface,
-          borderColor: tokens.colors.line,
-          borderWidth: 1,
-        }
-      ]}
-      onPress={() => {
-        console.log('PersonalizedGallery: Product card pressed:', product.title);
-        onItemPress(product);
-      }}
-      activeOpacity={0.7}
-    >
+  const renderProductCard = (product: Product) => {
+    console.log('PersonalizedGallery: Rendering product card for:', product.title);
+    return (
+      <TouchableOpacity
+        key={product.id}
+        style={[
+          styles.productCard,
+          isLuxeTheme && {
+            backgroundColor: tokens.colors.surface,
+            borderColor: tokens.colors.line,
+            borderWidth: 1,
+          }
+        ]}
+        onPress={() => {
+          console.log('PersonalizedGallery: Product card pressed:', product.title, 'ID:', product.id);
+          console.log('PersonalizedGallery: onItemPress function:', typeof onItemPress);
+          try {
+            onItemPress(product);
+          } catch (error) {
+            console.error('PersonalizedGallery: Error calling onItemPress:', error);
+          }
+        }}
+        activeOpacity={0.7}
+        pointerEvents="auto"
+      >
       <View style={styles.productImageContainer}>
         {product.primary_image_url ? (
           <Image source={{ uri: product.primary_image_url }} style={styles.productImage} />
@@ -244,7 +253,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
 
   return (
     <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={styles.scrollView} pointerEvents="auto">
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerContent}>
@@ -280,6 +289,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           
           {products.length > 0 ? (
             <View style={styles.productsGrid}>
+              {console.log('PersonalizedGallery: Rendering', products.length, 'products')}
               {products.map(renderProductCard)}
             </View>
           ) : (
@@ -335,6 +345,32 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
               size={20} 
               color={isLuxeTheme ? tokens.colors.text : '#FFFFFF'} 
             />
+          </TouchableOpacity>
+          
+          {/* Test Navigation Button */}
+          <TouchableOpacity
+            style={[
+              styles.continueButton,
+              isLuxeTheme && {
+                backgroundColor: tokens.colors.gold,
+                borderColor: tokens.colors.gold,
+                borderWidth: 1,
+                marginTop: 8,
+              }
+            ]}
+            onPress={() => {
+              console.log('Test navigation button pressed');
+              router.push('/item/test-product-id');
+            }}
+          >
+            <Text 
+              style={[
+                styles.continueButtonText,
+                isLuxeTheme && { color: tokens.colors.bg }
+              ]}
+            >
+              Test Navigation
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
