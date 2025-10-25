@@ -104,16 +104,20 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   }, []);
 
   const handleAnswer = (questionId: string, answerId: string) => {
+    console.log('handleAnswer called:', { questionId, answerId, currentStep, totalQuestions: ONBOARDING_QUESTIONS.length });
     const newAnswers = { ...answers, [questionId]: answerId };
     setAnswers(newAnswers);
     answerQuestion(questionId, answerId);
     
     // Auto-advance after answering
     setTimeout(() => {
+      console.log('Auto-advance check:', { currentStep, isLastQuestion: currentStep >= ONBOARDING_QUESTIONS.length - 1 });
       if (currentStep < ONBOARDING_QUESTIONS.length - 1) {
+        console.log('Moving to next question');
         setCurrentStep(currentStep + 1);
         nextStep();
       } else {
+        console.log('Quiz completed - showing results screen');
         // Quiz completed - show results screen
         // Don't call completeOnboarding() yet - wait until user continues
         setShowResults(true);
@@ -156,6 +160,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   console.log('OnboardingFlow - showResults:', showResults, 'persona:', persona, 'currentStep:', currentStep);
 
   const currentQuestion = ONBOARDING_QUESTIONS[currentStep];
+  console.log('Current question:', currentQuestion?.id, 'Options:', currentQuestion?.options?.length);
   
   if (currentQuestion?.type === 'question') {
     return (
