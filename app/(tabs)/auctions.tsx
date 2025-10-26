@@ -57,6 +57,36 @@ export default function AuctionsScreen() {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'live' | 'ending'>('all');
   const { isLuxeTheme, tokens } = useTheme();
 
+  const luxeStyles = isLuxeTheme ? {
+    container: { backgroundColor: tokens.colors.bg },
+    header: { backgroundColor: tokens.colors.bgElev },
+    title: { color: tokens.colors.text, fontFamily: tokens.typography.display },
+    filterButton: { 
+      backgroundColor: tokens.colors.surface,
+      borderColor: tokens.colors.line,
+      borderWidth: 1,
+    },
+    selectedFilter: { 
+      backgroundColor: tokens.colors.gold,
+      borderColor: tokens.colors.gold,
+    },
+    filterText: { color: tokens.colors.text },
+    selectedFilterText: { color: tokens.colors.bg },
+    auctionCard: { 
+      backgroundColor: tokens.colors.bgElev,
+      borderColor: tokens.colors.line,
+      borderWidth: 1,
+      ...tokens.shadows.luxe1
+    },
+    auctionTitle: { color: tokens.colors.text },
+    auctionDescription: { color: tokens.colors.muted },
+    bidLabel: { color: tokens.colors.muted },
+    bidAmount: { color: tokens.colors.text },
+    startingBid: { color: tokens.colors.muted },
+    timeText: { color: tokens.colors.muted },
+    bidCountText: { color: tokens.colors.muted },
+  } : {};
+
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     // Simulate API call
@@ -173,36 +203,6 @@ export default function AuctionsScreen() {
       </Text>
     </TouchableOpacity>
   );
-
-  const luxeStyles = isLuxeTheme ? {
-    container: { backgroundColor: tokens.colors.bg },
-    header: { backgroundColor: tokens.colors.bgElev },
-    title: { color: tokens.colors.text, fontFamily: tokens.typography.display },
-    filterButton: { 
-      backgroundColor: tokens.colors.surface,
-      borderColor: tokens.colors.line,
-      borderWidth: 1,
-    },
-    selectedFilter: { 
-      backgroundColor: tokens.colors.gold,
-      borderColor: tokens.colors.gold,
-    },
-    filterText: { color: tokens.colors.text },
-    selectedFilterText: { color: tokens.colors.bg },
-    auctionCard: { 
-      backgroundColor: tokens.colors.bgElev,
-      borderColor: tokens.colors.line,
-      borderWidth: 1,
-      ...tokens.shadows.luxe1
-    },
-    auctionTitle: { color: tokens.colors.text },
-    auctionDescription: { color: tokens.colors.muted },
-    bidLabel: { color: tokens.colors.muted },
-    bidAmount: { color: tokens.colors.text },
-    startingBid: { color: tokens.colors.muted },
-    timeText: { color: tokens.colors.muted },
-    bidCountText: { color: tokens.colors.muted },
-  } : {};
 
   return (
     <SafeAreaView style={[styles.container, luxeStyles.container]} edges={['bottom']}>
