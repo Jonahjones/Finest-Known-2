@@ -16,7 +16,7 @@ import { supabase } from '../../src/lib/supabase';
 
 export default function HomeScreen() {
   const { isLuxeTheme, tokens } = useTheme();
-  const { user, session, loading, checkSession, forceSessionRestore } = useAuth();
+  const { user, session, loading, checkSession, forceSessionRestore, signOut } = useAuth();
   const [featuredProducts, setFeaturedProducts] = React.useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = React.useState(true);
 
@@ -74,6 +74,14 @@ export default function HomeScreen() {
               <View style={styles.userStatus}>
                 <Ionicons name="checkmark-circle" size={20} color={isLuxeTheme ? tokens.colors.success : "#32C36A"} />
                 <Text style={[styles.userStatusText, isLuxeTheme && { color: tokens.colors.success }]}>Logged In</Text>
+                <TouchableOpacity 
+                  style={[styles.logoutButton, isLuxeTheme && { backgroundColor: tokens.colors.danger }]}
+                  onPress={async () => {
+                    await signOut();
+                  }}
+                >
+                  <Text style={[styles.logoutButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>Logout</Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity onPress={() => router.push('/auth')}>
@@ -253,6 +261,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#32C36A',
+  },
+  logoutButton: {
+    backgroundColor: '#FF5A5A',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  logoutButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   loginButton: {
     fontSize: 16,
