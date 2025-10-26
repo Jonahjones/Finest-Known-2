@@ -32,7 +32,7 @@ export default function AuctionsScreen() {
   const fetchAuctions = async () => {
     try {
       setLoading(true);
-      // Fetch products that are marked as auctions
+      // Fetch only active auction events - these should be rare and special
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -41,13 +41,13 @@ export default function AuctionsScreen() {
         .not('primary_image_url', 'is', null)
         .neq('primary_image_url', '')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(5); // Only show 5 most recent special auction events
 
       if (error) {
         console.error('Error fetching auctions:', error);
         setAuctions([]);
       } else {
-        console.log('Fetched auctions:', data?.length || 0);
+        console.log('Fetched special auction events:', data?.length || 0);
         // Transform products to auction format
         const transformedAuctions = (data || []).map(product => ({
           id: product.id,
@@ -232,16 +232,35 @@ export default function AuctionsScreen() {
         {renderFilterButton('ending', 'Ending Soon')}
       </View>
 
-      <FlatList
-        data={auctions}
-        renderItem={renderAuction}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.auctionsList}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="hourglass-outline" size={48} color={isLuxeTheme ? tokens.colors.muted : colors.text.secondary} />
+          <Text style={[styles.emptyTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+            Loading Special Events...
+          </Text>
+        </View>
+      ) : auctions.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="calendar-outline" size={64} color={isLuxeTheme ? tokens.colors.muted : colors.text.secondary} />
+          <Text style={[styles.emptyTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+            No Special Auctions Currently
+          </Text>
+          <Text style={[styles.emptySubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>
+            Check back soon for our next exclusive auction event
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={auctions}
+          renderItem={renderAuction}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.auctionsList}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -303,6 +322,31 @@ const styles = StyleSheet.create({
   auctionsList: {
     padding: spacing.lg,
     paddingTop: 0,
+  },
+  
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xxl,
+    minHeight: 400,
+  },
+  
+  emptyTitle: {
+    fontSize: typography.heading.fontSize,
+    lineHeight: typography.heading.lineHeight,
+    fontWeight: typography.heading.fontWeight,
+    color: colors.text.primary,
+    marginTop: spacing.lg,
+    textAlign: 'center',
+  },
+  
+  emptySubtitle: {
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    color: colors.text.secondary,
+    marginTop: spacing.md,
+    textAlign: 'center',
   },
   
   auctionCard: {
