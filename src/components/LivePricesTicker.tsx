@@ -3,10 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Dimensions,
   StatusBar,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
 import { getLivePrices, refreshLivePrices } from '../api/livePrices';
 import { LivePrice } from '../api/types';
@@ -24,10 +24,10 @@ interface LivePricesTickerProps {
 export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
   const [prices, setPrices] = useState<LivePrice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [menuVisible, setMenuVisible] = useState(false);
   const cartItemCount = useCartItemCount();
   const { user, session, signOut: handleSignOut } = useAuth();
+  const animatedValue = React.useRef(new Animated.Value(0)).current;
 
   const loadPrices = async () => {
     try {
@@ -69,16 +69,21 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
   useEffect(() => {
     if (prices.length === 0) return;
 
-    const scrollInterval = setInterval(() => {
-      setScrollPosition(prev => {
-        const itemWidth = 200; // Approximate width of each price item
-        const totalWidth = prices.length * itemWidth * 2; // Double for seamless loop
-        return (prev + 0.5) % totalWidth; // Slower, smoother movement
-      });
-    }, 16); // 60fps smooth scrolling
+    const itemWidth = 180; // Width of each price item
+    const totalWidth = prices.length * itemWidth * 2; // Double for seamless loop
+    
+    const startAnimation = () => {
+      Animated.loop(
+        Animated.timing(animatedValue, {
+          toValue: totalWidth,
+          duration: totalWidth * 10, // Speed of animation
+          useNativeDriver: true,
+        })
+      ).start();
+    };
 
-    return () => clearInterval(scrollInterval);
-  }, [prices]);
+    startAnimation();
+  }, [prices, animatedValue]);
 
   const formatPrice = (price: number) => {
     return `$${price.toFixed(2)}`;
@@ -114,19 +119,20 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <View style={styles.tickerContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          scrollEnabled={false}
-          style={styles.scrollView}
-          contentOffset={{ x: scrollPosition, y: 0 }}
-        >
-          <View style={styles.pricesContainer}>
+        <View style={styles.scrollView}>
+          <Animated.View 
+            style={[
+              styles.pricesContainer,
+              {
+                transform: [{ translateX: Animated.multiply(animatedValue, -1) }]
+              }
+            ]}
+          >
             {duplicatedPrices.map((price, index) => (
-              <View
+              <TouchableOpacity
                 key={`${price.metal}-${index}`}
                 style={styles.priceItem}
-                onTouchEnd={() => onPricePress?.(price.metal)}
+                onPress={() => onPricePress?.(price.metal)}
               >
                 <Text style={styles.metalSymbol} numberOfLines={1}>{price.metal.toUpperCase()}</Text>
                 <Text style={styles.priceValue}>{formatPrice(price.price)}</Text>
@@ -138,20 +144,13 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
                 >
                   {formatChange(price.change, price.changePercent)}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))}
-          </View>
-        </ScrollView>
+          </Animated.View>
+        </View>
         
         {/* Avatar and Menu */}
         <View style={styles.rightSection}>
-          <TouchableOpacity 
-            style={styles.refreshButton}
-            onPress={handleRefresh}
-            disabled={loading}
-          >
-            <Text style={styles.refreshText}>↻</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.avatarButton}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>U</Text>

@@ -16,7 +16,7 @@ import { supabase } from '../../src/lib/supabase';
 
 export default function HomeScreen() {
   const { isLuxeTheme, tokens } = useTheme();
-  const { user, session, loading, checkSession, forceSessionRestore, signOut } = useAuth();
+  const { user } = useAuth();
   const [featuredProducts, setFeaturedProducts] = React.useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = React.useState(true);
 
@@ -70,76 +70,11 @@ export default function HomeScreen() {
         <View style={[styles.header, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
           <Text style={[styles.logo, isLuxeTheme && { color: tokens.colors.text }]}>FinestKnown</Text>
           <View style={styles.headerRight}>
-            {user ? (
-              <View style={styles.userStatus}>
-                <Ionicons name="checkmark-circle" size={20} color={isLuxeTheme ? tokens.colors.success : "#32C36A"} />
-                <Text style={[styles.userStatusText, isLuxeTheme && { color: tokens.colors.success }]}>Logged In</Text>
-                <TouchableOpacity 
-                  style={[styles.logoutButton, isLuxeTheme && { backgroundColor: tokens.colors.danger }]}
-                  onPress={async () => {
-                    await signOut();
-                  }}
-                >
-                  <Text style={[styles.logoutButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>Logout</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity onPress={() => router.push('/auth')}>
-                <Text style={[styles.loginButton, isLuxeTheme && { color: tokens.colors.gold }]}>Login</Text>
-              </TouchableOpacity>
-            )}
             <TouchableOpacity>
               <Ionicons name="search" size={24} color={isLuxeTheme ? tokens.colors.text : "#000"} />
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Debug Auth Status */}
-        <View style={[styles.debugSection, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.debugTitle, isLuxeTheme && { color: tokens.colors.text }]}>
-            Auth Status (Debug)
-          </Text>
-          <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
-            Loading: {loading ? 'Yes' : 'No'}
-          </Text>
-          <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
-            User: {user ? 'Logged In' : 'Not Logged In'}
-          </Text>
-          <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
-            Session: {session ? 'Active' : 'No Session'}
-          </Text>
-          <Text style={[styles.debugText, isLuxeTheme && { color: tokens.colors.muted }]}>
-            User ID: {user?.id || 'N/A'}
-          </Text>
-          <TouchableOpacity 
-            style={[styles.checkSessionButton, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}
-            onPress={checkSession}
-          >
-            <Text style={[styles.checkSessionButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
-              Check Session
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.checkSessionButton, isLuxeTheme && { backgroundColor: tokens.colors.gold, marginTop: 8 }]}
-            onPress={forceSessionRestore}
-          >
-            <Text style={[styles.checkSessionButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
-              Force Restore Session
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Welcome Message for Logged-in Users */}
-        {user && (
-          <View style={[styles.welcomeSection, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line, borderWidth: 1 }]}>
-            <Text style={[styles.welcomeTitle, isLuxeTheme && { color: tokens.colors.text }]}>
-              Welcome back!
-            </Text>
-            <Text style={[styles.welcomeSubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>
-              You're logged in and ready to explore premium precious metals
-            </Text>
-          </View>
-        )}
 
         {/* Live Prices Ticker is now at the top of the app */}
 
