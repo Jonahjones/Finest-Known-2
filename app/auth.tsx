@@ -117,6 +117,10 @@ export default function AuthScreen() {
           resetOnboarding();
           // Don't navigate - let auth state change handle UI update
           console.log('Signup completed, waiting for auth state change...');
+          // Small delay to allow state to propagate
+          setTimeout(() => {
+            router.replace('/(tabs)');
+          }, 500);
         }
       } else {
         console.log('Sign in successful:', signInData);
@@ -124,8 +128,11 @@ export default function AuthScreen() {
         console.log('Session after signin:', signInData.session);
         // Reset onboarding state to ensure quiz shows for existing users
         resetOnboarding();
-        // Don't navigate - let auth state change handle UI update
-        console.log('Signin completed, waiting for auth state change...');
+        // Small delay to allow state to propagate
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 500);
+        console.log('Signin completed, navigating to app...');
       }
     } catch (error) {
       console.error('Test SSO error:', error);
