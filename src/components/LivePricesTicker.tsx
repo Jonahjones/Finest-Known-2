@@ -175,8 +175,8 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         onAccountPress={() => {
-          // TODO: Navigate to account screen when implemented
-          console.log('Account pressed');
+          // Navigate to account screen
+          router.push('/(tabs)/account');
         }}
         onWishlistPress={() => {
           // TODO: Navigate to wishlist screen when implemented
