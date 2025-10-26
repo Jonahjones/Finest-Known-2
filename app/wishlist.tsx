@@ -12,7 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useWishlist } from '../src/hooks/useWishlist';
 import { useCart } from '../src/hooks/useCart';
-import { Button } from '../src/components/ui/Button';
 import { Card } from '../src/components/ui/Card';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { colors, spacing, typography } from '../src/design/tokens';
@@ -39,8 +38,18 @@ export default function WishlistScreen() {
   };
 
   const handleAddToCart = async (productId: string, productTitle: string) => {
-    await addToCart(productId, 1);
-    Alert.alert('Added to Cart', `"${productTitle}" has been added to your cart`);
+    try {
+      await addToCart(productId, 1);
+      // Remove from wishlist after adding to cart
+      await removeFromWishlist(productId);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add item to cart');
+    }
+  };
+
+  const handleBuyNow = (productId: string) => {
+    // Navigate to item detail page for immediate purchase
+    router.push(`/item/${productId}`);
   };
 
   const handleRemoveFromWishlist = (productId: string, productTitle: string) => {
@@ -56,11 +65,6 @@ export default function WishlistScreen() {
         },
       ]
     );
-  };
-
-  const handleCheckout = () => {
-    // Navigate to checkout screen
-    router.push('/checkout');
   };
 
   const renderWishlistItem = ({ item }: { item: any }) => {
@@ -95,6 +99,14 @@ export default function WishlistScreen() {
         </View>
         
         <View style={styles.itemActions}>
+          <TouchableOpacity
+            style={styles.buyNowButton}
+            onPress={() => handleBuyNow(item.product_id)}
+          >
+            <Ionicons name="cash-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.buyNowButtonText}>Buy Now</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => handleAddToCart(item.product_id, item.product?.title)}
@@ -163,21 +175,6 @@ export default function WishlistScreen() {
         contentContainerStyle={styles.wishlistList}
         showsVerticalScrollIndicator={false}
       />
-
-      {wishlistItems.length > 0 && (
-        <View style={styles.footer}>
-          <Button
-            title="Add All to Cart"
-            onPress={async () => {
-              for (const item of wishlistItems) {
-                await addToCart(item.product_id, 1);
-              }
-              Alert.alert('Added to Cart', 'All wishlist items have been added to your cart');
-            }}
-            style={styles.addAllButton}
-          />
-        </View>
-      )}
     </SafeAreaView>
   );
 }
@@ -266,17 +263,37 @@ const styles = StyleSheet.create({
   },
   
   itemActions: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing.xs,
+  },
+  
+  buyNowButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    padding: spacing.sm,
+    borderRadius: 8,
+    gap: spacing.xs,
+  },
+  
+  buyNowButtonText: {
+    fontSize: typography.caption.fontSize,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
   
   actionButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.surface,
     padding: spacing.sm,
     borderRadius: 8,
-    marginBottom: spacing.sm,
   },
   
   actionButtonText: {
@@ -288,17 +305,8 @@ const styles = StyleSheet.create({
   
   removeButton: {
     padding: spacing.sm,
-  },
-  
-  footer: {
-    padding: spacing.lg,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  
-  addAllButton: {
-    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   
   loadingContainer: {
