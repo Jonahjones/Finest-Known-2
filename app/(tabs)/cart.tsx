@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -29,15 +29,15 @@ export default function CartScreen() {
     getTotalItems,
   } = useCart();
 
-  const formatPrice = (cents: number) => {
+  const formatPrice = useCallback((cents: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
     }).format(cents / 100);
-  };
+  }, []);
 
-  const handleRemoveItem = (productId: string, productTitle: string) => {
+  const handleRemoveItem = useCallback((productId: string, productTitle: string) => {
     Alert.alert(
       'Remove Item',
       `Remove "${productTitle}" from your cart?`,
@@ -50,9 +50,9 @@ export default function CartScreen() {
         },
       ]
     );
-  };
+  }, [removeFromCart]);
 
-  const handleClearCart = () => {
+  const handleClearCart = useCallback(() => {
     Alert.alert(
       'Clear Cart',
       'Remove all items from your cart?',
@@ -65,14 +65,14 @@ export default function CartScreen() {
         },
       ]
     );
-  };
+  }, [clearCart]);
 
-  const handleCheckout = () => {
+  const handleCheckout = useCallback(() => {
     // Navigate to checkout screen
-    console.log('Navigate to checkout');
-  };
+    router.push('/checkout');
+  }, []);
 
-  const renderCartItem = ({ item }: { item: any }) => {
+  const renderCartItem = React.useCallback(({ item }: { item: any }) => {
     const imageUrl = item.product?.primary_image_url || item.product?.image_url;
     
     return (
@@ -132,7 +132,9 @@ export default function CartScreen() {
         </View>
       </Card>
     );
-  };
+  }, [removeFromCart, updateQuantity, formatPrice, handleRemoveItem]);
+
+  const keyExtractor = React.useCallback((item: any) => item.id, []);
 
   if (loading) {
     return (
@@ -192,9 +194,13 @@ export default function CartScreen() {
       <FlatList
         data={cartItems}
         renderItem={renderCartItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
         contentContainerStyle={styles.cartList}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        windowSize={10}
+        initialNumToRender={10}
       />
 
       <View style={styles.footer}>

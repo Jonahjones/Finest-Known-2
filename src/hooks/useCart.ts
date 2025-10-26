@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { listCartItems } from '../api/cart';
 import { CartItem } from '../api/types';
@@ -41,8 +41,8 @@ export function useCartItemCount() {
     
     fetchCartItems();
     
-    // Refresh cart count periodically
-    const interval = setInterval(fetchCartItems, 2000);
+    // Reduced polling frequency from 2 seconds to 60 seconds for better performance
+    const interval = setInterval(fetchCartItems, 60000);
     
     return () => clearInterval(interval);
   }, []);
@@ -117,21 +117,22 @@ export function useCart() {
     }
   };
 
-  const getTotalPrice = () => {
+  const getTotalPrice = useCallback(() => {
     return cartItems.reduce((total, item) => {
       if (item.product) {
         return total + (item.product.retail_price_cents * item.quantity);
       }
       return total;
     }, 0);
-  };
+  }, [cartItems]);
 
-  const getTotalItems = () => {
+  const getTotalItems = useCallback(() => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
-  };
+  }, [cartItems]);
 
   useEffect(() => {
     fetchCartItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

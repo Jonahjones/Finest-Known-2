@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -37,7 +37,7 @@ export default function WishlistScreen() {
     }).format(cents / 100);
   };
 
-  const handleAddToCart = async (productId: string, productTitle: string) => {
+  const handleAddToCart = useCallback(async (productId: string, productTitle: string) => {
     try {
       await addToCart(productId, 1);
       // Remove from wishlist after adding to cart
@@ -45,14 +45,14 @@ export default function WishlistScreen() {
     } catch (error) {
       Alert.alert('Error', 'Failed to add item to cart');
     }
-  };
+  }, [addToCart, removeFromWishlist]);
 
-  const handleBuyNow = (productId: string) => {
+  const handleBuyNow = useCallback((productId: string) => {
     // Navigate to item detail page for immediate purchase
     router.push(`/item/${productId}`);
-  };
+  }, []);
 
-  const handleRemoveFromWishlist = (productId: string, productTitle: string) => {
+  const handleRemoveFromWishlist = useCallback((productId: string, productTitle: string) => {
     Alert.alert(
       'Remove from Wishlist',
       `Remove "${productTitle}" from your wishlist?`,
@@ -65,9 +65,9 @@ export default function WishlistScreen() {
         },
       ]
     );
-  };
+  }, [removeFromWishlist]);
 
-  const renderWishlistItem = ({ item }: { item: any }) => {
+  const renderWishlistItem = React.useCallback(({ item }: { item: any }) => {
     const imageUrl = item.product?.primary_image_url || item.product?.image_url;
     
     return (
@@ -124,7 +124,9 @@ export default function WishlistScreen() {
         </View>
       </Card>
     );
-  };
+  }, [handleAddToCart, handleBuyNow, handleRemoveFromWishlist, formatPrice]);
+
+  const keyExtractor = React.useCallback((item: any) => item.id, []);
 
   if (loading) {
     return (
@@ -171,9 +173,13 @@ export default function WishlistScreen() {
       <FlatList
         data={wishlistItems}
         renderItem={renderWishlistItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
         contentContainerStyle={styles.wishlistList}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        windowSize={10}
+        initialNumToRender={10}
       />
     </SafeAreaView>
   );

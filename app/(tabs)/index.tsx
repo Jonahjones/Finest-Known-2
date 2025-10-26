@@ -22,9 +22,9 @@ export default function HomeScreen() {
 
   React.useEffect(() => {
     fetchFeaturedProducts();
-  }, []);
+  }, [fetchFeaturedProducts]);
 
-  const fetchFeaturedProducts = async () => {
+  const fetchFeaturedProducts = React.useCallback(async () => {
     try {
       setLoadingProducts(true);
       const { data, error } = await supabase
@@ -40,7 +40,6 @@ export default function HomeScreen() {
         console.error('Error fetching featured products:', error);
         setFeaturedProducts([]);
       } else {
-        console.log('Fetched featured products:', data?.length || 0);
         setFeaturedProducts(data || []);
       }
     } catch (error) {
@@ -49,17 +48,16 @@ export default function HomeScreen() {
     } finally {
       setLoadingProducts(false);
     }
-  };
+  }, []);
 
-  const formatPrice = (priceCents: number) => {
+  const formatPrice = React.useCallback((priceCents: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(priceCents / 100);
-  };
+  }, []);
 
   const handleProductPress = (product: any) => {
-    console.log('Home: Product pressed:', product.title, 'ID:', product.id);
     router.push(`/item/${product.id}`);
   };
 

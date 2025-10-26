@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   addToWishlist as addToWishlistAPI, 
   removeFromWishlist as removeFromWishlistAPI,
@@ -12,13 +12,12 @@ export function useWishlist() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchWishlistItems = async () => {
+  const fetchWishlistItems = useCallback(async () => {
     setLoading(true);
     setError(null);
     
     try {
       const items = await getWishlistItems();
-      console.log('Fetched wishlist items:', items.length, items);
       setWishlistItems(items);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch wishlist');
@@ -27,7 +26,7 @@ export function useWishlist() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const addToWishlist = async (productId: string) => {
     try {
@@ -60,7 +59,7 @@ export function useWishlist() {
 
   useEffect(() => {
     fetchWishlistItems();
-  }, []);
+  }, [fetchWishlistItems]);
 
   return {
     wishlistItems,

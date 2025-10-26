@@ -16,8 +16,8 @@ export function useWishlistCount() {
     
     fetchWishlistItems();
     
-    // Refresh wishlist count periodically
-    const interval = setInterval(fetchWishlistItems, 2000);
+    // Reduced polling frequency from 2 seconds to 60 seconds for better performance
+    const interval = setInterval(fetchWishlistItems, 60000);
     
     return () => clearInterval(interval);
   }, []);
