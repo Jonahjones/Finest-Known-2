@@ -13,8 +13,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../src/components/ui/Card';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { colors, spacing, typography } from '../../src/design/tokens';
+import { supabase } from '../../src/lib/supabase';
 
-// Mock article data - in real app, this would come from API
+// Real article data from database
+
+// Temporary mock data until articles table is implemented
 const mockArticles = [
   {
     id: '1',

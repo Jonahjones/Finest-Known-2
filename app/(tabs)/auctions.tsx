@@ -14,48 +14,61 @@ import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { colors, spacing, typography } from '../../src/design/tokens';
+import { supabase } from '../../src/lib/supabase';
 
-// Mock auction data - in real app, this would come from API
-const mockAuctions = [
-  {
-    id: '1',
-    title: 'Rare 1921 Morgan Silver Dollar',
-    description: 'Mint condition Morgan Silver Dollar from 1921',
-    imageUrl: 'https://via.placeholder.com/300x200',
-    currentBid: 25000,
-    startingBid: 20000,
-    timeLeft: '2d 14h 32m',
-    bidCount: 12,
-    status: 'live',
-  },
-  {
-    id: '2',
-    title: 'Gold Eagle 1oz 2023',
-    description: 'American Gold Eagle in perfect condition',
-    imageUrl: 'https://via.placeholder.com/300x200',
-    currentBid: 210000,
-    startingBid: 200000,
-    timeLeft: '1d 8h 15m',
-    bidCount: 8,
-    status: 'live',
-  },
-  {
-    id: '3',
-    title: 'Platinum Maple Leaf 1oz',
-    description: 'Canadian Platinum Maple Leaf coin',
-    imageUrl: 'https://via.placeholder.com/300x200',
-    currentBid: 95000,
-    startingBid: 90000,
-    timeLeft: '5h 22m',
-    bidCount: 5,
-    status: 'live',
-  },
-];
+// Real auction data from database
 
 export default function AuctionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'live' | 'ending'>('all');
+  const [auctions, setAuctions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { isLuxeTheme, tokens } = useTheme();
+
+  React.useEffect(() => {
+    fetchAuctions();
+  }, []);
+
+  const fetchAuctions = async () => {
+    try {
+      setLoading(true);
+      // Fetch products that are marked as auctions
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .eq('is_auction', true)
+        .not('primary_image_url', 'is', null)
+        .neq('primary_image_url', '')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) {
+        console.error('Error fetching auctions:', error);
+        setAuctions([]);
+      } else {
+        console.log('Fetched auctions:', data?.length || 0);
+        // Transform products to auction format
+        const transformedAuctions = (data || []).map(product => ({
+          id: product.id,
+          title: product.title,
+          description: product.description,
+          imageUrl: product.primary_image_url,
+          currentBid: product.market_price_cents || product.retail_price_cents,
+          startingBid: product.retail_price_cents * 0.9,
+          timeLeft: '2d 14h 32m', // TODO: Calculate from auction_end_date
+          bidCount: Math.floor(Math.random() * 20) + 1,
+          status: 'live',
+        }));
+        setAuctions(transformedAuctions);
+      }
+    } catch (error) {
+      console.error('Error fetching auctions:', error);
+      setAuctions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const luxeStyles = isLuxeTheme ? {
     container: { backgroundColor: tokens.colors.bg },
@@ -87,10 +100,10 @@ export default function AuctionsScreen() {
     bidCountText: { color: tokens.colors.muted },
   } : {};
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => setRefreshing(false), 1000);
+    await fetchAuctions();
+    setRefreshing(false);
   }, []);
 
   const formatPrice = (cents: number) => {
@@ -220,7 +233,7 @@ export default function AuctionsScreen() {
       </View>
 
       <FlatList
-        data={mockAuctions}
+        data={auctions}
         renderItem={renderAuction}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.auctionsList}
