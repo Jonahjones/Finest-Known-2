@@ -172,14 +172,40 @@ export async function getWishlistItems(): Promise<WishlistItem[]> {
     const wishlistString = await AsyncStorage.getItem(WISHLIST_STORAGE_KEY);
     const wishlist: string[] = wishlistString ? JSON.parse(wishlistString) : [];
     
-    // Convert to WishlistItem format
-    return wishlist.map((productId, index) => ({
-      id: `local-${index}`,
-      product_id: productId,
-      user_id: user.id,
-      created_at: new Date().toISOString(),
-      product: undefined, // Products will need to be fetched separately
-    }));
+    if (wishlist.length === 0) {
+      return [];
+    }
+
+    // Fetch product details for each product ID
+    try {
+      const { data: products, error } = await supabase
+        .from('products')
+        .select('*')
+        .in('id', wishlist);
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        return [];
+      }
+
+      // Create a map of product ID to product data
+      const productMap = new Map();
+      (products || []).forEach((product: any) => {
+        productMap.set(product.id, product);
+      });
+
+      // Convert to WishlistItem format with product details
+      return wishlist.map((productId, index) => ({
+        id: `local-${index}`,
+        product_id: productId,
+        user_id: user.id,
+        created_at: new Date().toISOString(),
+        product: productMap.get(productId) || undefined,
+      }));
+    } catch (fetchError) {
+      console.error('Error fetching product details:', fetchError);
+      return [];
+    }
   } catch (error) {
     console.error('Error fetching wishlist:', error);
     return [];
