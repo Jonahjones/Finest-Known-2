@@ -15,7 +15,6 @@ async function loadPreviousPrices(): Promise<LivePrice[]> {
     const stored = await AsyncStorage.getItem(PREVIOUS_PRICES_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      console.log('Loaded previous prices from storage:', parsed);
       return parsed;
     }
   } catch (error) {
@@ -28,7 +27,6 @@ async function loadPreviousPrices(): Promise<LivePrice[]> {
 async function savePreviousPrices(prices: LivePrice[]): Promise<void> {
   try {
     await AsyncStorage.setItem(PREVIOUS_PRICES_KEY, JSON.stringify(prices));
-    console.log('Saved previous prices to storage:', prices);
   } catch (error) {
     console.warn('Error saving previous prices to storage:', error);
   }
@@ -39,8 +37,6 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
   const prices: LivePrice[] = [];
   
   try {
-    console.log('Fetching real-time precious metal prices from MetalPriceAPI...');
-    
     // Use MetalPriceAPI with provided API key
     try {
       const apiKey = '84edb30368bb74ccd2e666d1f489d020';
@@ -55,7 +51,6 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('MetalPriceAPI Response:', data);
         
         // Map response to our format
         const metalMappings = [
@@ -89,8 +84,6 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
               changePercent: changePercent,
               lastUpdated: new Date().toISOString(),
             });
-            
-            console.log(`Successfully fetched ${metal} price: $${pricePerOunce.toFixed(2)} per ounce (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
           }
         }
       } else {
@@ -102,7 +95,6 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
     
     // If MetalPriceAPI didn't work, use realistic fallback prices based on current market
     if (prices.length === 0) {
-      console.log('Using fallback prices based on current market...');
       const fallbackPrices = [
         { metal: 'gold', price: 2650.00, id: '1' },
         { metal: 'silver', price: 32.50, id: '2' },
@@ -128,8 +120,6 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
           changePercent: changePercent,
           lastUpdated: new Date().toISOString(),
         });
-        
-        console.log(`Using fallback ${fallback.metal} price: $${fallback.price} per ounce (${change >= 0 ? '+' : ''}${change.toFixed(2)} / ${changePercent.toFixed(2)}%)`);
       }
     }
     
@@ -147,7 +137,6 @@ async function fetchRealTimePrices(): Promise<LivePrice[]> {
   // Save to storage for persistence across app restarts
   await savePreviousPrices(prices);
   
-  console.log('Successfully fetched all metal prices:', prices);
   return prices;
 }
 
@@ -187,7 +176,6 @@ export async function getLivePrices(): Promise<LivePrice[]> {
       console.error('Error fetching live prices:', error);
       // Return cached prices if available, otherwise return empty array
       if (cachedPrices.length > 0) {
-        console.log('Using cached prices due to API error');
         return cachedPrices;
       }
       // If no cached prices and API fails, return empty array

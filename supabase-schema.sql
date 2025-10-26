@@ -54,6 +54,48 @@ CREATE TABLE IF NOT EXISTS live_metal_prices (
   last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- User profiles table
+CREATE TABLE IF NOT EXISTS user_profiles (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID NOT NULL UNIQUE,
+  display_name TEXT,
+  first_name TEXT,
+  last_name TEXT,
+  phone_number TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- User addresses table
+CREATE TABLE IF NOT EXISTS user_addresses (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  label TEXT NOT NULL,
+  street TEXT NOT NULL,
+  city TEXT NOT NULL,
+  state TEXT NOT NULL,
+  zip_code TEXT NOT NULL,
+  country TEXT NOT NULL DEFAULT 'USA',
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Wishlist table for user wishlist items  
+CREATE TABLE IF NOT EXISTS wishlist (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  product_id TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, product_id)
+);
+
+-- Create indexes for wishlist performance
+CREATE INDEX IF NOT EXISTS idx_wishlist_user_id ON wishlist (user_id);
+CREATE INDEX IF NOT EXISTS idx_wishlist_product_id ON wishlist (product_id);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_user_id ON user_addresses (user_id);
+
 -- Insert sample categories
 INSERT INTO categories (slug, name, image_url, persona_tags, sort_weight) VALUES
 ('bullion', 'Bullion & Precious Metals', 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop', ARRAY['precious_metal_investor', 'tangible_asset_buyer'], 100),
@@ -106,16 +148,37 @@ $$ language 'plpgsql';
 -- Add updated_at triggers
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_items_updated_at BEFORE UPDATE ON items FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_user_addresses_updated_at BEFORE UPDATE ON user_addresses FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Enable Row Level Security
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE item_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE live_metal_prices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wishlist ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_addresses ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for public read access
 CREATE POLICY "Categories are viewable by everyone" ON categories FOR SELECT USING (is_active = true);
 CREATE POLICY "Items are viewable by everyone" ON items FOR SELECT USING (is_published = true);
 CREATE POLICY "Item images are viewable by everyone" ON item_images FOR SELECT USING (true);
 CREATE POLICY "Live prices are viewable by everyone" ON live_metal_prices FOR SELECT USING (true);
+
+-- Wishlist policies
+CREATE POLICY IF NOT EXISTS "Users can view their own wishlist" ON wishlist FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY IF NOT EXISTS "Users can add to their own wishlist" ON wishlist FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY IF NOT EXISTS "Users can remove from their own wishlist" ON wishlist FOR DELETE USING (auth.uid() = user_id);
+
+-- User profiles policies
+CREATE POLICY IF NOT EXISTS "Users can view their own profile" ON user_profiles FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY IF NOT EXISTS "Users can insert their own profile" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY IF NOT EXISTS "Users can update their own profile" ON user_profiles FOR UPDATE USING (auth.uid() = user_id);
+
+-- User addresses policies
+CREATE POLICY IF NOT EXISTS "Users can view their own addresses" ON user_addresses FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY IF NOT EXISTS "Users can add their own addresses" ON user_addresses FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY IF NOT EXISTS "Users can update their own addresses" ON user_addresses FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY IF NOT EXISTS "Users can delete their own addresses" ON user_addresses FOR DELETE USING (auth.uid() = user_id);
 

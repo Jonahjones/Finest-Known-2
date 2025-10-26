@@ -13,10 +13,6 @@ export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const cartItemCount = useCartItemCount();
   const { isLuxeTheme, tokens } = useTheme();
-  
-  // Debug logging
-  console.log('TabLayout - isLuxeTheme:', isLuxeTheme);
-  console.log('TabLayout - tokens:', tokens);
 
   return (
     <Tabs

@@ -27,13 +27,37 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
   const [menuVisible, setMenuVisible] = useState(false);
   const cartItemCount = useCartItemCount();
   const { user, session, signOut: handleSignOut } = useAuth();
+  const [userName, setUserName] = React.useState<string>('');
+
+  React.useEffect(() => {
+    const fetchUserName = async () => {
+      if (user) {
+        try {
+          const { getUserProfile } = await import('../api/profile');
+          const profile = await getUserProfile();
+          if (profile) {
+            const name = profile.display_name || 
+                        (profile.first_name && profile.last_name ? `${profile.first_name} ${profile.last_name}` : null) ||
+                        user.email?.split('@')[0] || 
+                        'User';
+            setUserName(name);
+          } else {
+            setUserName(user.email?.split('@')[0] || 'User');
+          }
+        } catch (error) {
+          setUserName(user.email?.split('@')[0] || 'User');
+        }
+      } else {
+        setUserName('');
+      }
+    };
+    fetchUserName();
+  }, [user]);
   const animatedValue = React.useRef(new Animated.Value(0)).current;
 
   const loadPrices = async () => {
     try {
-      console.log('Loading live prices for ticker...');
       const livePrices = await getLivePrices();
-      console.log('Live prices loaded for ticker:', livePrices);
       setPrices(livePrices);
     } catch (error) {
       console.error('Error loading live prices for ticker:', error);
@@ -45,9 +69,7 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
   const handleRefresh = async () => {
     setLoading(true);
     try {
-      console.log('Manually refreshing live prices...');
       const livePrices = await refreshLivePrices();
-      console.log('Live prices refreshed:', livePrices);
       setPrices(livePrices);
     } catch (error) {
       console.error('Error refreshing live prices:', error);
@@ -176,12 +198,10 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
           router.push('/(tabs)/account');
         }}
         onWishlistPress={() => {
-          // TODO: Navigate to wishlist screen when implemented
-          console.log('Wishlist pressed');
+          router.push('/wishlist');
         }}
         onPortfolioPress={() => {
           // TODO: Navigate to portfolio screen when implemented
-          console.log('Portfolio pressed');
         }}
         onCartPress={() => {
           // Navigate to cart screen
@@ -198,6 +218,7 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
         }}
         isLoggedIn={!!user && !!session} // Check if user and session exist
         cartItemCount={cartItemCount}
+        userName={userName}
       />
     </View>
   );

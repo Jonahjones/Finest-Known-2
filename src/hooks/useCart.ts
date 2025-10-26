@@ -12,20 +12,39 @@ export function useCartItemCount() {
     // For demo purposes, just use local storage instead of requiring auth
     const fetchCartItems = async () => {
       try {
-        const cartItemsString = await AsyncStorage.getItem(CART_STORAGE_KEY);
-        if (cartItemsString) {
-          const cartItems = JSON.parse(cartItemsString);
-          setCartItemCount(cartItems.length);
+        // Try to fetch from database first
+        const items = await listCartItems();
+        if (items && items.length > 0) {
+          // Count total items (sum of all quantities)
+          const totalCount = items.reduce((sum, item) => sum + item.quantity, 0);
+          setCartItemCount(totalCount);
         } else {
           setCartItemCount(0);
         }
-      } catch (storageError) {
-        console.error('Failed to fetch cart items from storage', storageError);
-        setCartItemCount(0);
+      } catch (dbError) {
+        // Fallback to local storage if database fails
+        try {
+          const cartItemsString = await AsyncStorage.getItem(CART_STORAGE_KEY);
+          if (cartItemsString) {
+            const cartItems = JSON.parse(cartItemsString);
+            const totalCount = cartItems.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
+            setCartItemCount(totalCount);
+          } else {
+            setCartItemCount(0);
+          }
+        } catch (storageError) {
+          console.error('Failed to fetch cart items from storage', storageError);
+          setCartItemCount(0);
+        }
       }
     };
     
     fetchCartItems();
+    
+    // Refresh cart count periodically
+    const interval = setInterval(fetchCartItems, 2000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   return cartItemCount;

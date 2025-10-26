@@ -23,6 +23,7 @@ interface HamburgerMenuProps {
   onSignOutPress?: () => void;
   isLoggedIn?: boolean;
   cartItemCount?: number;
+  userName?: string;
 }
 
 export function HamburgerMenu({
@@ -36,6 +37,7 @@ export function HamburgerMenu({
   onSignOutPress,
   isLoggedIn = false,
   cartItemCount = 0,
+  userName,
 }: HamburgerMenuProps) {
   const slideAnim = React.useRef(new Animated.Value(screenWidth)).current;
 
@@ -116,7 +118,7 @@ export function HamburgerMenu({
           ]}
         >
           <View style={styles.menuHeader}>
-            <Text style={styles.menuTitle}>Menu</Text>
+            <Text style={styles.menuTitle}>{userName || 'Menu'}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#FFFFFF" />
             </TouchableOpacity>

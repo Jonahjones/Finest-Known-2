@@ -7,6 +7,7 @@ import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAuth } from '../../src/store/AuthContext';
 import { supabase } from '../../src/lib/supabase';
 import { addToCart } from '../../src/api/cart';
+import { addToWishlist, removeFromWishlist, isInWishlist as checkInWishlist } from '../../src/api/wishlist';
 
 interface Product {
   id: string;
@@ -26,14 +27,26 @@ export default function ItemDetailScreen() {
   const { user } = useAuth();
   const [product, setProduct] = React.useState<Product | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isInWishlistState, setIsInWishlistState] = React.useState(false);
 
   console.log('ItemDetailScreen: Component loaded with ID:', id);
 
   React.useEffect(() => {
     if (id) {
       fetchProduct();
+      checkWishlistStatus();
     }
-  }, [id]);
+  }, [id, user]);
+
+  const checkWishlistStatus = async () => {
+    if (!user || !id) return;
+    try {
+      const inWishlist = await checkInWishlist(id as string);
+      setIsInWishlistState(inWishlist);
+    } catch (error) {
+      console.error('Error checking wishlist status:', error);
+    }
+  };
 
   const fetchProduct = async () => {
     console.log('ItemDetailScreen: Fetching product with ID:', id);
@@ -96,14 +109,29 @@ export default function ItemDetailScreen() {
     Alert.alert('Purchase Now', `Purchase functionality for ${product?.title} will be implemented soon!`);
   };
 
-  const handleAddToWishlist = () => {
+  const handleAddToWishlist = async () => {
     if (!user) {
       Alert.alert('Login Required', 'Please create an account to add items to your wishlist.');
       router.push('/auth?mode=signup');
       return;
     }
-    
-    Alert.alert('Added to Wishlist', `${product?.title} has been added to your wishlist!`);
+
+    if (!product?.id) return;
+
+    try {
+      if (isInWishlistState) {
+        await removeFromWishlist(product.id);
+        Alert.alert('Removed from Wishlist', `${product.title} has been removed from your wishlist.`);
+        setIsInWishlistState(false);
+      } else {
+        await addToWishlist(product.id);
+        Alert.alert('Added to Wishlist', `${product.title} has been added to your wishlist!`);
+        setIsInWishlistState(true);
+      }
+    } catch (error) {
+      console.error('Wishlist error:', error);
+      Alert.alert('Error', 'Failed to update wishlist. Please try again.');
+    }
   };
 
   if (loading) {
@@ -142,7 +170,7 @@ export default function ItemDetailScreen() {
             Item Details
           </Text>
           <TouchableOpacity onPress={handleAddToWishlist}>
-            <Ionicons name="heart-outline" size={24} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
+            <Ionicons name={isInWishlistState ? "heart" : "heart-outline"} size={24} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
           </TouchableOpacity>
         </View>
 
@@ -216,9 +244,9 @@ export default function ItemDetailScreen() {
             style={[styles.wishlistButton, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.gold }]}
             onPress={handleAddToWishlist}
           >
-            <Ionicons name="heart-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
+            <Ionicons name={isInWishlistState ? "heart" : "heart-outline"} size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
             <Text style={[styles.wishlistButtonText, isLuxeTheme && { color: tokens.colors.gold }]}>
-              Add to Wishlist
+              {isInWishlistState ? "Remove from Wishlist" : "Add to Wishlist"}
             </Text>
           </TouchableOpacity>
         </View>

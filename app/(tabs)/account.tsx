@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,17 +16,66 @@ import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAuth } from '../../src/store/AuthContext';
 import { supabase } from '../../src/lib/supabase';
 import { colors, spacing, typography } from '../../src/design/tokens';
+import { getUserProfile, updateUserProfile, UserProfile } from '../../src/api/profile';
+import { getUserAddresses, addAddress, deleteAddress, Address } from '../../src/api/addresses';
 
 export default function AccountScreen() {
   const { isLuxeTheme, tokens } = useTheme();
   const { user, signOut } = useAuth();
   const [email, setEmail] = useState(user?.email || '');
+  const [displayName, setDisplayName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (user) {
+        try {
+          const userProfile = await getUserProfile();
+          if (userProfile) {
+            setProfile(userProfile);
+            setDisplayName(userProfile.display_name || '');
+            setFirstName(userProfile.first_name || '');
+            setLastName(userProfile.last_name || '');
+            setPhoneNumber(userProfile.phone_number || '');
+          }
+          
+          const userAddresses = await getUserAddresses();
+          setAddresses(userAddresses);
+        } catch (error) {
+          console.error('Error fetching profile data:', error);
+        }
+      }
+    };
+    fetchProfileData();
+  }, [user]);
+
+  const handleUpdateProfile = async () => {
+    setLoading(true);
+    try {
+      await updateUserProfile({
+        display_name: displayName,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+      });
+      Alert.alert('Success', 'Your profile has been updated successfully.');
+    } catch (error) {
+      console.error('Profile update error:', error);
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUpdatePassword = async () => {
     if (!newPassword || newPassword.length < 6) {
@@ -108,13 +157,76 @@ export default function AccountScreen() {
             </View>
             <View style={styles.profileInfo}>
               <Text style={[styles.profileName, isLuxeTheme && { color: tokens.colors.text }]}>
-                {user?.email?.split('@')[0] || 'User'}
+                {displayName || firstName || lastName || user?.email?.split('@')[0] || 'User'}
               </Text>
               <Text style={[styles.profileEmail, isLuxeTheme && { color: tokens.colors.muted }]}>
                 {email}
               </Text>
             </View>
           </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+              Display Name
+            </Text>
+            <TextInput
+              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder="Enter display name"
+              placeholderTextColor={isLuxeTheme ? tokens.colors.muted : "#999"}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+              First Name
+            </Text>
+            <TextInput
+              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              value={firstName}
+              onChangeText={setFirstName}
+              placeholder="Enter first name"
+              placeholderTextColor={isLuxeTheme ? tokens.colors.muted : "#999"}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+              Last Name
+            </Text>
+            <TextInput
+              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              value={lastName}
+              onChangeText={setLastName}
+              placeholder="Enter last name"
+              placeholderTextColor={isLuxeTheme ? tokens.colors.muted : "#999"}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+              Phone Number
+            </Text>
+            <TextInput
+              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              placeholder="Enter phone number"
+              placeholderTextColor={isLuxeTheme ? tokens.colors.muted : "#999"}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.updateButton, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}
+            onPress={handleUpdateProfile}
+            disabled={loading}
+          >
+            <Text style={[styles.updateButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+              {loading ? 'Updating...' : 'Update Profile'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Account Information */}

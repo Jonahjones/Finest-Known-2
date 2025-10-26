@@ -29,7 +29,7 @@ export default function AuthScreen() {
   const [useOfflineMode, setUseOfflineMode] = useState(false);
   const { signIn, signUp } = useAuth();
   const { isLuxeTheme, tokens } = useTheme();
-  const { resetOnboarding } = useOnboardingStore();
+  const onboardingStore = useOnboardingStore();
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -84,6 +84,14 @@ export default function AuthScreen() {
     try {
       console.log('Starting Test SSO authentication...');
       
+      // Generate random credentials for test account
+      const randomId = Math.random().toString(36).substring(2, 15);
+      const randomNum = Math.floor(Math.random() * 10000);
+      const testEmail = `test+${randomId}${randomNum}@finestknown.com`;
+      const testPassword = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8).toUpperCase() + Math.floor(Math.random() * 10);
+      
+      console.log('Generated test credentials:', { email: testEmail });
+      
       // First test basic connectivity
       console.log('Testing Supabase connectivity...');
       const { data: testData, error: testError } = await supabase.from('profiles').select('id').limit(1);
@@ -96,45 +104,28 @@ export default function AuthScreen() {
       
       console.log('Supabase connectivity test passed');
       
-      // Now try to sign in with test user
-      console.log('Attempting to sign in with test user...');
-      const { data: signInData, error: signInError } = await signIn('test@finestknown.com', 'testpassword123');
+      // Create a new real account with generated credentials
+      console.log('Creating new test account with generated credentials...');
+      const { data: signUpData, error: signUpError } = await signUp(testEmail, testPassword);
       
-      if (signInError) {
-        console.log('Sign in failed, attempting to create new user:', signInError.message);
-        
-        // If test user doesn't exist, create one
-        const { data: signUpData, error: signUpError } = await signUp('test@finestknown.com', 'testpassword123');
-        
-        if (signUpError) {
-          console.error('Sign up error:', signUpError);
-          Alert.alert('Authentication Error', `Failed to create test account: ${signUpError.message}`);
-        } else {
-          console.log('Test account created successfully:', signUpData);
-          console.log('User after signup:', signUpData.user);
-          console.log('Session after signup:', signUpData.session);
-          // Reset onboarding state for new user
-          resetOnboarding();
-          // Don't navigate - let auth state change handle UI update
-          console.log('Signup completed, waiting for auth state change...');
-          // Small delay to allow state to propagate
-          setTimeout(() => {
-            router.replace('/(tabs)');
-          }, 500);
-        }
+      if (signUpError) {
+        console.error('Sign up error:', signUpError);
+        Alert.alert('Authentication Error', `Failed to create test account: ${signUpError.message}`);
       } else {
-        console.log('Sign in successful:', signInData);
-        console.log('User after signin:', signInData.user);
-        console.log('Session after signin:', signInData.session);
-        // Reset onboarding state to ensure quiz shows for existing users
-        resetOnboarding();
+        console.log('Test account created successfully:', signUpData);
+        console.log('User after signup:', signUpData.user);
+        console.log('Session after signup:', signUpData.session);
+        console.log('Test account credentials:', { email: testEmail, password: testPassword });
+        // Reset onboarding state for new user
+        (onboardingStore as any).resetOnboarding();
+        // Don't navigate - let auth state change handle UI update
+        console.log('Signup completed, waiting for auth state change...');
         // Small delay to allow state to propagate
         setTimeout(() => {
           router.replace('/(tabs)');
         }, 500);
-        console.log('Signin completed, navigating to app...');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Test SSO error:', error);
       
       // Offer offline mode as fallback
