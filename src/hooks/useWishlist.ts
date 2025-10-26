@@ -18,6 +18,7 @@ export function useWishlist() {
     
     try {
       const items = await getWishlistItems();
+      console.log('Fetched wishlist items:', items.length, items);
       setWishlistItems(items);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch wishlist');

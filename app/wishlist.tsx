@@ -16,12 +16,19 @@ import { Button } from '../src/components/ui/Button';
 import { Card } from '../src/components/ui/Card';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { colors, spacing, typography } from '../src/design/tokens';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 export default function WishlistScreen() {
   const { isLuxeTheme, tokens } = useTheme();
-  const { wishlistItems, loading, error, removeFromWishlist } = useWishlist();
+  const { wishlistItems, loading, error, removeFromWishlist, refreshWishlist } = useWishlist();
   const { addToCart } = useCart();
+
+  // Refresh wishlist when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshWishlist();
+    }, [])
+  );
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
