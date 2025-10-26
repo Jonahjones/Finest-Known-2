@@ -27,7 +27,7 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [menuVisible, setMenuVisible] = useState(false);
   const cartItemCount = useCartItemCount();
-  const { user, session } = useAuth();
+  const { user, session, signOut: handleSignOut } = useAuth();
 
   const loadPrices = async () => {
     try {
@@ -175,8 +175,16 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         onAccountPress={() => {
-          // Navigate to account screen
-          router.push('/(tabs)');
+          // TODO: Navigate to account screen when implemented
+          console.log('Account pressed');
+        }}
+        onWishlistPress={() => {
+          // TODO: Navigate to wishlist screen when implemented
+          console.log('Wishlist pressed');
+        }}
+        onPortfolioPress={() => {
+          // TODO: Navigate to portfolio screen when implemented
+          console.log('Portfolio pressed');
         }}
         onCartPress={() => {
           // Navigate to cart screen
@@ -185,6 +193,11 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
         onSignInPress={() => {
           // Navigate to auth screen
           router.push('/auth');
+        }}
+        onSignOutPress={async () => {
+          // Sign out user
+          await handleSignOut();
+          setMenuVisible(false);
         }}
         isLoggedIn={!!user && !!session} // Check if user and session exist
         cartItemCount={cartItemCount}

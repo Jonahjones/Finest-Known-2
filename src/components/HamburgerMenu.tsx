@@ -17,7 +17,10 @@ interface HamburgerMenuProps {
   onClose: () => void;
   onAccountPress?: () => void;
   onCartPress?: () => void;
+  onWishlistPress?: () => void;
+  onPortfolioPress?: () => void;
   onSignInPress?: () => void;
+  onSignOutPress?: () => void;
   isLoggedIn?: boolean;
   cartItemCount?: number;
 }
@@ -27,7 +30,10 @@ export function HamburgerMenu({
   onClose,
   onAccountPress,
   onCartPress,
+  onWishlistPress,
+  onPortfolioPress,
   onSignInPress,
+  onSignOutPress,
   isLoggedIn = false,
   cartItemCount = 0,
 }: HamburgerMenuProps) {
@@ -58,6 +64,20 @@ export function HamburgerMenu({
       show: isLoggedIn,
     },
     {
+      id: 'wishlist',
+      title: 'Wishlist',
+      icon: 'heart-outline',
+      onPress: onWishlistPress,
+      show: isLoggedIn,
+    },
+    {
+      id: 'portfolio',
+      title: 'My Portfolio',
+      icon: 'briefcase-outline',
+      onPress: onPortfolioPress,
+      show: isLoggedIn,
+    },
+    {
       id: 'cart',
       title: 'Cart',
       icon: 'cart-outline',
@@ -69,7 +89,7 @@ export function HamburgerMenu({
       id: 'signin',
       title: isLoggedIn ? 'Sign Out' : 'Sign In / Sign Up',
       icon: isLoggedIn ? 'log-out-outline' : 'person-add-outline',
-      onPress: onSignInPress,
+      onPress: isLoggedIn ? onSignOutPress : onSignInPress,
       show: true,
     },
   ];
