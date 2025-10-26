@@ -149,13 +149,8 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
           </Animated.View>
         </View>
         
-        {/* Avatar and Menu */}
+        {/* Menu */}
         <View style={styles.rightSection}>
-          <TouchableOpacity style={styles.avatarButton}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>U</Text>
-            </View>
-          </TouchableOpacity>
           <TouchableOpacity 
             style={styles.menuButton}
             onPress={() => setMenuVisible(true)}
