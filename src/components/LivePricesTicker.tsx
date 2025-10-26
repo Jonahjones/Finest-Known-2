@@ -215,9 +215,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
+    position: 'relative',
   },
   scrollView: {
     flex: 1,
+    paddingRight: 60, // Space for hamburger menu icon
   },
   pricesContainer: {
     flexDirection: 'row',
@@ -263,10 +265,16 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   rightSection: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    gap: 8,
+    paddingRight: 12,
+    paddingLeft: 8,
+    backgroundColor: '#000000',
+    zIndex: 10,
   },
   refreshButton: {
     padding: 6,
