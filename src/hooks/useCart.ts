@@ -41,17 +41,13 @@ export function useCart() {
     setError(null);
     
     try {
-      // For demo purposes, use local storage instead of requiring auth
-      const cartItemsString = await AsyncStorage.getItem(CART_STORAGE_KEY);
-      if (cartItemsString) {
-        const items = JSON.parse(cartItemsString);
-        setCartItems(items);
-      } else {
-        setCartItems([]);
-      }
+      // Try to fetch from database first
+      const items = await listCartItems();
+      setCartItems(items);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch cart items');
       console.error('Error fetching cart items:', err);
+      // Fallback to empty array if database fetch fails
       setCartItems([]);
     } finally {
       setLoading(false);

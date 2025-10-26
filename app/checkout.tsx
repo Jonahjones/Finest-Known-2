@@ -14,6 +14,8 @@ import { Button } from '../src/components/ui/Button';
 import { Card } from '../src/components/ui/Card';
 import { useCart } from '../src/hooks/useCart';
 import { colors, typography, spacing } from '../src/design/tokens';
+import { requestCheckout } from '../src/api/checkout';
+import { router } from 'expo-router';
 
 export default function CheckoutScreen() {
   const { cartItems, getTotalPrice, getTotalItems } = useCart();
@@ -27,6 +29,7 @@ export default function CheckoutScreen() {
     country: 'United States',
   });
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [processing, setProcessing] = useState(false);
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -36,12 +39,37 @@ export default function CheckoutScreen() {
     }).format(cents / 100);
   };
 
-  const handlePlaceOrder = () => {
-    Alert.alert(
-      'Order Placed',
-      'Your order has been successfully placed!',
-      [{ text: 'OK', onPress: () => {} }]
-    );
+  const handlePlaceOrder = async () => {
+    // Validate shipping info
+    if (!shippingInfo.firstName || !shippingInfo.lastName || !shippingInfo.address || 
+        !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
+      Alert.alert('Missing Information', 'Please fill in all shipping information.');
+      return;
+    }
+
+    setProcessing(true);
+    
+    try {
+      // Create order with shipping and payment info
+      const result = await requestCheckout();
+      
+      Alert.alert(
+        'Order Placed',
+        `Your order #${result.order_id.slice(0, 8)} has been successfully placed!`,
+        [{ 
+          text: 'OK', 
+          onPress: () => {
+            // Navigate back to home screen
+            router.replace('/(tabs)');
+          }
+        }]
+      );
+    } catch (error) {
+      console.error('Checkout error:', error);
+      Alert.alert('Checkout Failed', 'There was an error processing your order. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const renderCartItem = (item: any) => (
@@ -211,8 +239,9 @@ export default function CheckoutScreen() {
 
       <View style={styles.footer}>
         <Button
-          title="Place Order"
+          title={processing ? "Processing..." : "Place Order"}
           onPress={handlePlaceOrder}
+          disabled={processing}
           style={styles.placeOrderButton}
         />
       </View>

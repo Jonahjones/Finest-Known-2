@@ -6,6 +6,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAuth } from '../../src/store/AuthContext';
 import { supabase } from '../../src/lib/supabase';
+import { addToCart } from '../../src/api/cart';
 
 interface Product {
   id: string;
@@ -64,14 +65,25 @@ export default function ItemDetailScreen() {
     }).format(priceCents / 100);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!user) {
       Alert.alert('Login Required', 'Please log in to add items to your cart.');
       router.push('/auth?mode=signin');
       return;
     }
+
+    if (!product?.id) {
+      Alert.alert('Error', 'Product information is not available.');
+      return;
+    }
     
-    Alert.alert('Added to Cart', `${product?.title} has been added to your cart!`);
+    try {
+      await addToCart(product.id, 1);
+      Alert.alert('Added to Cart', `${product?.title} has been added to your cart!`);
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      Alert.alert('Error', 'Failed to add item to cart. Please try again.');
+    }
   };
 
   const handlePurchaseNow = () => {
