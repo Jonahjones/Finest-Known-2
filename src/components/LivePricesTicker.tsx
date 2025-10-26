@@ -13,6 +13,7 @@ import { LivePrice } from '../api/types';
 import { HamburgerMenu } from './HamburgerMenu';
 import { useCartItemCount } from '../hooks/useCart';
 import { router } from 'expo-router';
+import { useAuth } from '../store/AuthContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -26,6 +27,7 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [menuVisible, setMenuVisible] = useState(false);
   const cartItemCount = useCartItemCount();
+  const { user, session } = useAuth();
 
   const loadPrices = async () => {
     try {
@@ -184,7 +186,7 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
           // Navigate to auth screen
           router.push('/auth');
         }}
-        isLoggedIn={false} // You can get this from auth context
+        isLoggedIn={!!user && !!session} // Check if user and session exist
         cartItemCount={cartItemCount}
       />
     </View>
