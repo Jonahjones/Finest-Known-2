@@ -65,18 +65,21 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-scroll animation
+  // Auto-scroll animation with seamless loop
   useEffect(() => {
     if (prices.length === 0) return;
 
-    const itemWidth = 180; // Width of each price item
-    const totalWidth = prices.length * itemWidth * 2; // Double for seamless loop
+    const itemWidth = 200; // Width of each price item
+    const totalWidth = prices.length * itemWidth; // Width of single set
     
+    // Reset to 0 when reaching the end for seamless loop
     const startAnimation = () => {
+      animatedValue.setValue(0);
+      
       Animated.loop(
         Animated.timing(animatedValue, {
           toValue: totalWidth,
-          duration: totalWidth * 10, // Speed of animation
+          duration: 30000, // 30 seconds for full loop (slower)
           useNativeDriver: true,
         })
       ).start();
