@@ -121,12 +121,12 @@ export default function ItemDetailScreen() {
     try {
       if (isInWishlistState) {
         await removeFromWishlist(product.id);
-        Alert.alert('Removed from Wishlist', `${product.title} has been removed from your wishlist.`);
         setIsInWishlistState(false);
+        // Don't show alert for removing from wishlist
       } else {
         await addToWishlist(product.id);
-        Alert.alert('Added to Wishlist', `${product.title} has been added to your wishlist!`);
         setIsInWishlistState(true);
+        // Don't show alert for adding to wishlist
       }
     } catch (error) {
       console.error('Wishlist error:', error);
