@@ -64,26 +64,29 @@ function PCGSMarketDataComponent({
   const bidDisplay = bidValue > 0 ? `$${(bidValue / 100).toFixed(2)}` : '$0.00';
   const askDisplay = askValue > 0 ? `$${(askValue / 100).toFixed(2)}` : '$0.00';
 
+  // Ensure boolean type to prevent Java casting errors
+  const isLuxe = Boolean(isLuxeTheme);
+  
   return (
-    <View style={[styles.pcgsDataCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line }]}>
+    <View style={[styles.pcgsDataCard, isLuxe ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
       <View style={styles.sectionHeader}>
-        <Ionicons name="analytics-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
-        <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+        <Ionicons name="analytics-outline" size={20} color={isLuxe ? tokens.colors.gold : "#00D4AA"} />
+        <Text style={[styles.sectionTitle, isLuxe ? { color: tokens.colors.text } : null]}>
           Market Data
         </Text>
       </View>
 
       {/* Population Stats */}
       <View style={styles.statsRow}>
-        <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Population</Text>
-          <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
+        <View style={[styles.statBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.statLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Population</Text>
+          <Text style={[styles.statValue, isLuxe ? { color: tokens.colors.text } : null]}>
             {populationStr}
           </Text>
         </View>
-        <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Higher</Text>
-          <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
+        <View style={[styles.statBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.statLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Higher</Text>
+          <Text style={[styles.statValue, isLuxe ? { color: tokens.colors.text } : null]}>
             {populationHigherStr}
           </Text>
         </View>
@@ -92,21 +95,21 @@ function PCGSMarketDataComponent({
       {/* Price Guide */}
       {coinData.PriceGuideInfo && (
         <View style={styles.priceRow}>
-          <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-            <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Price</Text>
-            <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.gold }]}>
+          <View style={[styles.priceBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
+            <Text style={[styles.priceLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Price</Text>
+            <Text style={[styles.priceValue, isLuxe ? { color: tokens.colors.gold } : null]}>
               {priceDisplay}
             </Text>
           </View>
-          <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-            <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Bid</Text>
-            <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
+          <View style={[styles.priceBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
+            <Text style={[styles.priceLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Bid</Text>
+            <Text style={[styles.priceValue, isLuxe ? { color: tokens.colors.text } : null]}>
               {bidDisplay}
             </Text>
           </View>
-          <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-            <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Ask</Text>
-            <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
+          <View style={[styles.priceBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
+            <Text style={[styles.priceLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Ask</Text>
+            <Text style={[styles.priceValue, isLuxe ? { color: tokens.colors.text } : null]}>
               {askDisplay}
             </Text>
           </View>
