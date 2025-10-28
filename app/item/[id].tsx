@@ -89,6 +89,14 @@ export default function ItemDetailScreen() {
     }).format(priceCents / 100);
   };
 
+  // Helper function to safely convert price to number
+  const safePriceValue = (value: number | string | undefined | null): number => {
+    if (value === null || value === undefined) return 0;
+    if (typeof value === 'number') return value;
+    const parsed = parseFloat(String(value));
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
   const handleAddToCart = async () => {
     if (!user) {
       Alert.alert('Login Required', 'Please log in to add items to your cart.');
@@ -283,13 +291,13 @@ export default function ItemDetailScreen() {
               <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
                 <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Population</Text>
                 <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
-                  {coinData.Population?.toLocaleString() || 'N/A'}
+                  {safePopulationValue(coinData.Population).toLocaleString() || 'N/A'}
                 </Text>
               </View>
               <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
                 <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Higher</Text>
                 <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
-                  {coinData.PopulationHigher?.toLocaleString() || 'N/A'}
+                  {safePopulationValue(coinData.PopulationHigher).toLocaleString() || 'N/A'}
                 </Text>
               </View>
             </View>
@@ -300,19 +308,19 @@ export default function ItemDetailScreen() {
                 <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
                   <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Price</Text>
                   <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.gold }]}>
-                    ${typeof coinData.PriceGuideInfo.Price === 'number' ? (coinData.PriceGuideInfo.Price / 100).toFixed(2) : (parseFloat(coinData.PriceGuideInfo.Price || '0') / 100).toFixed(2)}
+                    ${(safePriceValue(coinData.PriceGuideInfo.Price) / 100).toFixed(2)}
                   </Text>
                 </View>
                 <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
                   <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Bid</Text>
                   <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
-                    ${typeof coinData.PriceGuideInfo.Bid === 'number' ? (coinData.PriceGuideInfo.Bid / 100).toFixed(2) : (parseFloat(coinData.PriceGuideInfo.Bid || '0') / 100).toFixed(2)}
+                    ${(safePriceValue(coinData.PriceGuideInfo.Bid) / 100).toFixed(2)}
                   </Text>
                 </View>
                 <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
                   <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Ask</Text>
                   <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
-                    ${typeof coinData.PriceGuideInfo.Ask === 'number' ? (coinData.PriceGuideInfo.Ask / 100).toFixed(2) : (parseFloat(coinData.PriceGuideInfo.Ask || '0') / 100).toFixed(2)}
+                    ${(safePriceValue(coinData.PriceGuideInfo.Ask) / 100).toFixed(2)}
                   </Text>
                 </View>
               </View>
