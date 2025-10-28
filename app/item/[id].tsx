@@ -277,56 +277,72 @@ export default function ItemDetailScreen() {
         )}
 
         {/* PCGS Market Data */}
-        {coinData && !pcgsLoading && (
-          <View style={[styles.pcgsDataCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line }]}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="analytics-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
-              <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
-                Market Data
-              </Text>
-            </View>
+        {coinData && !pcgsLoading && (() => {
+          // Pre-compute all values to avoid inline arithmetic that can cause Java casting errors
+          const population = safePopulationValue(coinData.Population);
+          const populationHigher = safePopulationValue(coinData.PopulationHigher);
+          const populationStr = population > 0 ? population.toLocaleString() : 'N/A';
+          const populationHigherStr = populationHigher > 0 ? populationHigher.toLocaleString() : 'N/A';
+          
+          const priceValue = safePriceValue(coinData.PriceGuideInfo?.Price);
+          const bidValue = safePriceValue(coinData.PriceGuideInfo?.Bid);
+          const askValue = safePriceValue(coinData.PriceGuideInfo?.Ask);
+          
+          const priceDisplay = priceValue > 0 ? `$${(priceValue / 100).toFixed(2)}` : '$0.00';
+          const bidDisplay = bidValue > 0 ? `$${(bidValue / 100).toFixed(2)}` : '$0.00';
+          const askDisplay = askValue > 0 ? `$${(askValue / 100).toFixed(2)}` : '$0.00';
 
-            {/* Population Stats */}
-            <View style={styles.statsRow}>
-              <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-                <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Population</Text>
-                <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
-                  {safePopulationValue(coinData.Population).toLocaleString() || 'N/A'}
+          return (
+            <View style={[styles.pcgsDataCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line }]}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="analytics-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
+                <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+                  Market Data
                 </Text>
               </View>
-              <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-                <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Higher</Text>
-                <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
-                  {safePopulationValue(coinData.PopulationHigher).toLocaleString() || 'N/A'}
-                </Text>
-              </View>
-            </View>
 
-            {/* Price Guide */}
-            {coinData.PriceGuideInfo && (
-              <View style={styles.priceRow}>
-                <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-                  <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Price</Text>
-                  <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.gold }]}>
-                    ${(safePriceValue(coinData.PriceGuideInfo.Price) / 100).toFixed(2)}
+              {/* Population Stats */}
+              <View style={styles.statsRow}>
+                <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                  <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Population</Text>
+                  <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
+                    {populationStr}
                   </Text>
                 </View>
-                <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-                  <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Bid</Text>
-                  <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
-                    ${(safePriceValue(coinData.PriceGuideInfo.Bid) / 100).toFixed(2)}
-                  </Text>
-                </View>
-                <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-                  <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Ask</Text>
-                  <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
-                    ${(safePriceValue(coinData.PriceGuideInfo.Ask) / 100).toFixed(2)}
+                <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                  <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Higher</Text>
+                  <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
+                    {populationHigherStr}
                   </Text>
                 </View>
               </View>
-            )}
-          </View>
-        )}
+
+              {/* Price Guide */}
+              {coinData.PriceGuideInfo && (
+                <View style={styles.priceRow}>
+                  <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                    <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Price</Text>
+                    <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.gold }]}>
+                      {priceDisplay}
+                    </Text>
+                  </View>
+                  <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                    <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Bid</Text>
+                    <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
+                      {bidDisplay}
+                    </Text>
+                  </View>
+                  <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                    <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Ask</Text>
+                    <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
+                      {askDisplay}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          );
+        })()}
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
