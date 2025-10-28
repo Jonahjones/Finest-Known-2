@@ -37,7 +37,6 @@ export interface PCGSCoinFacts {
     Bid?: number | string;
     Ask?: number | string;
   };
-_spider
   // Additional fields for market data
   EstimatedValue?: number;
   PopulationInGrade?: number;
