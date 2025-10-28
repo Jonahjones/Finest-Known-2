@@ -7,14 +7,14 @@ const PCGS_API_KEY = Constants.expoConfig?.extra?.pcgsApiKey;
 
 export interface PCGSPriceHistory {
   date: string;
-  price: number;
+  price: number | string;
   grade?: string;
 }
 
 export interface PCGSPopulationHistory {
   date: string;
-  population: number;
-  population_higher: number;
+  population: number | string;
+  population_higher: number | string;
   grade?: string;
 }
 
