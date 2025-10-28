@@ -33,10 +33,11 @@ export interface PCGSCoinFacts {
   Edge?: string;
   Notes?: string;
   PriceGuideInfo?: {
-    Price?: number;
-    Bid?: number;
-    Ask?: number;
+    Price?: number | string;
+    Bid?: number | string;
+    Ask?: number | string;
   };
+_spider
   // Additional fields for market data
   EstimatedValue?: number;
   PopulationInGrade?: number;
