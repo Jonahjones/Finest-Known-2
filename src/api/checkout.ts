@@ -3,26 +3,17 @@ import { CartItem } from './types';
 
 export async function finalizeOrder(cartItems: any[]): Promise<void> {
   try {
-    // Convert cart items to the format expected by the RPC function
-    const items = cartItems.map(item => ({
-      product_id: item.product_id,
-      qty: item.quantity,
-    }));
-
-    const { error } = await supabase.rpc('checkout_decrement', {
-      _items: items,
-    });
-
-    if (error) {
-      throw error;
-    }
+    // Inventory tracking would go here if needed
+    // For now, we'll just log the completion
+    console.log('Order finalized:', cartItems.length, 'items');
+    // Note: No inventory decrement for now since products don't have stock tracking
   } catch (error) {
     console.error('Error in finalizeOrder:', error);
     throw error;
   }
 }
 
-export async function requestCheckout(): Promise<{ order_id: string; total_cents: number }> {
+export async function requestCheckout(shippingAddress?: any): Promise<{ order_id: string; total_cents: number }> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -31,39 +22,45 @@ export async function requestCheckout(): Promise<{ order_id: string; total_cents
     }
 
     // Get cart items
-    const cartItems = await supabase
+    const { data: cart } = await supabase
+      .from('carts')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+
+    const { data: cartItems, error: cartItemsError } = await supabase
       .from('cart_items')
       .select(`
         *,
         product:products(*)
       `)
-      .eq('cart_id', (await supabase
-        .from('carts')
-        .select('id')
-        .eq('user_id', user.id)
-        .single()
-      ).data.id);
+      .eq('cart_id', cart.id);
 
-    if (cartItems.error) {
-      throw cartItems.error;
+    if (cartItemsError) {
+      throw cartItemsError;
     }
 
-    if (!cartItems.data || cartItems.data.length === 0) {
+    if (!cartItems || cartItems.length === 0) {
       throw new Error('Cart is empty');
     }
 
     // Calculate total
-    const total_cents = cartItems.data.reduce((sum, item) => {
+    const total_cents = cartItems.reduce((sum, item) => {
       return sum + (item.product.retail_price_cents * item.quantity);
     }, 0);
 
-    // Create order
+    // Create order with shipping address
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         user_id: user.id,
         total_cents,
-        status: 'pending',
+        status: 'confirmed',
+        shipping_address: shippingAddress || null,
       })
       .select()
       .single();
@@ -73,7 +70,7 @@ export async function requestCheckout(): Promise<{ order_id: string; total_cents
     }
 
     // Create order items
-    const orderItems = cartItems.data.map(item => ({
+    const orderItems = cartItems.map(item => ({
       order_id: order.id,
       product_id: item.product_id,
       quantity: item.quantity,
@@ -89,18 +86,13 @@ export async function requestCheckout(): Promise<{ order_id: string; total_cents
     }
 
     // Decrement stock
-    await finalizeOrder(cartItems.data);
+    await finalizeOrder(cartItems);
 
     // Clear cart
     await supabase
       .from('cart_items')
       .delete()
-      .eq('cart_id', (await supabase
-        .from('carts')
-        .select('id')
-        .eq('user_id', user.id)
-        .single()
-      ).data.id);
+      .eq('cart_id', cart.id);
 
     return { order_id: order.id, total_cents };
   } catch (error) {

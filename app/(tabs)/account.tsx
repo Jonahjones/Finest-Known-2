@@ -18,6 +18,7 @@ import { supabase } from '../../src/lib/supabase';
 import { colors, spacing, typography } from '../../src/design/tokens';
 import { getUserProfile, updateUserProfile, UserProfile } from '../../src/api/profile';
 import { getUserAddresses, addAddress, deleteAddress, Address } from '../../src/api/addresses';
+import { getUserOrders } from '../../src/api/checkout';
 
 export default function AccountScreen() {
   const { isLuxeTheme, tokens } = useTheme();
@@ -35,6 +36,8 @@ export default function AccountScreen() {
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -51,6 +54,10 @@ export default function AccountScreen() {
           
           const userAddresses = await getUserAddresses();
           setAddresses(userAddresses);
+
+          // Fetch user orders
+          const userOrders = await getUserOrders();
+          setOrders(userOrders);
         } catch (error) {
           console.error('Error fetching profile data:', error);
         }
@@ -379,6 +386,63 @@ export default function AccountScreen() {
           </View>
         </View>
 
+        {/* Orders / Portfolio */}
+        <View style={[styles.section, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+          <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+            Portfolio & Orders
+          </Text>
+
+          {ordersLoading ? (
+            <Text style={[styles.emptyText, isLuxeTheme && { color: tokens.colors.muted }]}>
+              Loading orders...
+            </Text>
+          ) : orders.length === 0 ? (
+            <Text style={[styles.emptyText, isLuxeTheme && { color: tokens.colors.muted }]}>
+              You haven't made any purchases yet.
+            </Text>
+          ) : (
+            orders.map((order) => (
+              <View key={order.id} style={styles.orderCard}>
+                <View style={styles.orderHeader}>
+                  <View>
+                    <Text style={[styles.orderNumber, isLuxeTheme && { color: tokens.colors.text }]}>
+                      Order #{order.id.slice(0, 8)}
+                    </Text>
+                    <Text style={[styles.orderDate, isLuxeTheme && { color: tokens.colors.muted }]}>
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <View style={[styles.statusBadge, order.status === 'confirmed' && styles.confirmedBadge]}>
+                    <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
+                  </View>
+                </View>
+
+                {order.order_items?.map((item: any, index: number) => (
+                  <View key={item.id || index} style={styles.orderItem}>
+                    <View style={styles.orderItemInfo}>
+                      <Text style={[styles.orderItemTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+                        {item.product?.title || 'Product'}
+                      </Text>
+                      <Text style={[styles.orderItemDetails, isLuxeTheme && { color: tokens.colors.muted }]}>
+                        Qty: {item.quantity} × {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((item.price_cents || 0) / 100)}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+
+                <View style={styles.orderTotal}>
+                  <Text style={[styles.orderTotalLabel, isLuxeTheme && { color: tokens.colors.text }]}>
+                    Total:
+                  </Text>
+                  <Text style={[styles.orderTotalValue, isLuxeTheme && { color: tokens.colors.gold }]}>
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((order.total_cents || 0) / 100)}
+                  </Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
         {/* Sign Out */}
         <View style={styles.signOutSection}>
           <TouchableOpacity
@@ -536,6 +600,86 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  orderCard: {
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+  },
+  orderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  orderNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  orderDate: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    backgroundColor: '#E5E7EB',
+  },
+  confirmedBadge: {
+    backgroundColor: '#00D4AA',
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  orderItem: {
+    marginBottom: 8,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  orderItemInfo: {
+    flex: 1,
+  },
+  orderItemTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 4,
+  },
+  orderItemDetails: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  orderTotal: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  orderTotalLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  orderTotalValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#00D4AA',
   },
 });
 

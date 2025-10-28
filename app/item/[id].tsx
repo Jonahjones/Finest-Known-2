@@ -8,6 +8,7 @@ import { useAuth } from '../../src/store/AuthContext';
 import { supabase } from '../../src/lib/supabase';
 import { addToCart } from '../../src/api/cart';
 import { addToWishlist, removeFromWishlist, isInWishlist as checkInWishlist } from '../../src/api/wishlist';
+import { usePCGSVerification } from '../../src/hooks/usePCGSVerification';
 
 interface Product {
   id: string;
@@ -17,6 +18,10 @@ interface Product {
   metal_type: string;
   weight_grams: number;
   year?: number;
+  grade?: string | null;
+  cert_number?: string | null;
+  market_price_cents?: number | null;
+  last_sale_cents?: number | null;
   primary_image_url: string;
   category_id: string;
 }
@@ -28,6 +33,12 @@ export default function ItemDetailScreen() {
   const [product, setProduct] = React.useState<Product | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [isInWishlistState, setIsInWishlistState] = React.useState(false);
+  
+  // PCGS Verification
+  const { verification: pcgsVerification, coinData, loading: pcgsLoading } = usePCGSVerification(
+    product?.cert_number || null,
+    product?.grade || null
+  );
 
   console.log('ItemDetailScreen: Component loaded with ID:', id);
 
@@ -215,6 +226,100 @@ export default function ItemDetailScreen() {
           </Text>
         </View>
 
+        {/* PCGS Verification - Show for any product with cert_number */}
+        {product.cert_number && (
+          <View style={[styles.verificationCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line }]}>
+            <View style={styles.verificationHeader}>
+              <Ionicons name="shield-checkmark" size={24} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
+              <Text style={[styles.verificationTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+                PCGS Certified
+              </Text>
+            </View>
+            
+            {pcgsLoading ? (
+              <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.muted }]}>
+                Verifying certification...
+              </Text>
+            ) : pcgsVerification?.verified ? (
+              <View>
+                <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.text }]}>
+                  Grade: {product.grade}
+                </Text>
+                <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.muted }]}>
+                  Cert #: {product.cert_number}
+                </Text>
+                <Text style={[styles.verificationBadge, isLuxeTheme && { color: tokens.colors.success }]}>
+                  ✓ Verified by PCGS
+                </Text>
+              </View>
+            ) : (
+              <View>
+                <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.text }]}>
+                  Grade: {product.grade}
+                </Text>
+                <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.muted }]}>
+                  Cert #: {product.cert_number}
+                </Text>
+                <Text style={[styles.verificationBadge, isLuxeTheme && { color: tokens.colors.muted }]}>
+                  Certification data pending
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* PCGS Market Data */}
+        {coinData && !pcgsLoading && (
+          <View style={[styles.pcgsDataCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line }]}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="analytics-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
+              <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+                Market Data
+              </Text>
+            </View>
+
+            {/* Population Stats */}
+            <View style={styles.statsRow}>
+              <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Population</Text>
+                <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
+                  {coinData.Population?.toLocaleString() || 'N/A'}
+                </Text>
+              </View>
+              <View style={[styles.statBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                <Text style={[styles.statLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Higher</Text>
+                <Text style={[styles.statValue, isLuxeTheme && { color: tokens.colors.text }]}>
+                  {coinData.PopulationHigher?.toLocaleString() || 'N/A'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Price Guide */}
+            {coinData.PriceGuideInfo && (
+              <View style={styles.priceRow}>
+                <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                  <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Price</Text>
+                  <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.gold }]}>
+                    ${typeof coinData.PriceGuideInfo.Price === 'number' ? (coinData.PriceGuideInfo.Price / 100).toFixed(2) : (parseFloat(coinData.PriceGuideInfo.Price || '0') / 100).toFixed(2)}
+                  </Text>
+                </View>
+                <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                  <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Bid</Text>
+                  <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
+                    ${typeof coinData.PriceGuideInfo.Bid === 'number' ? (coinData.PriceGuideInfo.Bid / 100).toFixed(2) : (parseFloat(coinData.PriceGuideInfo.Bid || '0') / 100).toFixed(2)}
+                  </Text>
+                </View>
+                <View style={[styles.priceBox, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+                  <Text style={[styles.priceLabel, isLuxeTheme && { color: tokens.colors.muted }]}>Ask</Text>
+                  <Text style={[styles.priceValue, isLuxeTheme && { color: tokens.colors.text }]}>
+                    ${typeof coinData.PriceGuideInfo.Ask === 'number' ? (coinData.PriceGuideInfo.Ask / 100).toFixed(2) : (parseFloat(coinData.PriceGuideInfo.Ask || '0') / 100).toFixed(2)}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
+        )}
+
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity 
@@ -386,8 +491,103 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 8,
   },
+  verificationCard: {
+    margin: 20,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  verificationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  verificationTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  verificationText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  verificationBadge: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#32C36A',
+    marginTop: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
   wishlistButtonText: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#00D4AA',
+  },
+  pcgsDataCard: {
+    margin: 20,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  statBox: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666666',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  priceRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  priceBox: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+  },
+  priceLabel: {
+    fontSize: 12,
+    color: '#666666',
+    marginBottom: 4,
+  },
+  priceValue: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#00D4AA',
   },

@@ -51,7 +51,17 @@ export default function CheckoutScreen() {
     
     try {
       // Create order with shipping and payment info
-      const result = await requestCheckout();
+      const shippingAddress = {
+        firstName: shippingInfo.firstName,
+        lastName: shippingInfo.lastName,
+        address: shippingInfo.address,
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        zipCode: shippingInfo.zipCode,
+        country: shippingInfo.country,
+      };
+      
+      const result = await requestCheckout(shippingAddress);
       
       Alert.alert(
         'Order Placed',

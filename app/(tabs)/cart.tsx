@@ -15,6 +15,7 @@ import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { colors, spacing, typography } from '../../src/design/tokens';
+import { router } from 'expo-router';
 
 export default function CartScreen() {
   const { isLuxeTheme, tokens } = useTheme();
@@ -69,7 +70,7 @@ export default function CartScreen() {
 
   const handleCheckout = () => {
     // Navigate to checkout screen
-    console.log('Navigate to checkout');
+    router.push('/checkout');
   };
 
   const renderCartItem = ({ item }: { item: any }) => {
