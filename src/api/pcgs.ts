@@ -23,8 +23,8 @@ export interface PCGSCoinFacts {
   Grade: string;
   Designation?: string;
   Variety?: string;
-  Population?: number;
-  PopulationHigher?: number;
+  Population?: number | string;
+  PopulationHigher?: number | string;
   TotalProduced?: string;
   Designer?: string;
   Diameter?: string;
