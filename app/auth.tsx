@@ -28,7 +28,9 @@ export default function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [useOfflineMode, setUseOfflineMode] = useState(false);
   const { signIn, signUp } = useAuth();
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const onboardingStore = useOnboardingStore();
 
   const handleSignIn = async () => {
@@ -192,7 +194,7 @@ export default function AuthScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]}>
+    <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -213,10 +215,10 @@ export default function AuthScreen() {
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={[styles.title, isLuxeTheme && { color: tokens.colors.text, fontFamily: tokens.typography.display }]}>
+            <Text style={[styles.title, isLuxeTheme ? { color: tokens.colors.text, fontFamily: tokens.typography.display } : null]}>
               {isSignUp ? 'Create Account' : 'Sign In'}
             </Text>
-            <Text style={[styles.subtitle, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.subtitle, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               {isSignUp 
                 ? 'Start your precious metals journey' 
                 : 'Access your portfolio'
@@ -297,7 +299,7 @@ export default function AuthScreen() {
                 placeholderTextColor="#666666"
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry={true}
                 autoCapitalize="none"
               />
             </View>
@@ -311,7 +313,7 @@ export default function AuthScreen() {
                   placeholderTextColor="#666666"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  secureTextEntry
+                  secureTextEntry={true}
                   autoCapitalize="none"
                 />
               </View>
@@ -320,7 +322,7 @@ export default function AuthScreen() {
             <TouchableOpacity 
               style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
               onPress={isSignUp ? handleSignUp : handleSignIn}
-              disabled={loading}
+              disabled={Boolean(loading)}
             >
               <Text style={styles.primaryButtonText}>
                 {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
@@ -344,7 +346,7 @@ export default function AuthScreen() {
           <TouchableOpacity 
             style={[styles.ssoButton, styles.fakeButton]}
             onPress={handleTestSSO}
-            disabled={loading}
+            disabled={Boolean(loading)}
           >
             <Ionicons name="flash" size={20} color="#FFFFFF" />
             <Text style={styles.ssoButtonText}>

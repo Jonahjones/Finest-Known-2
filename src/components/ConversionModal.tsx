@@ -109,8 +109,8 @@ export function ConversionModal({
 
   return (
     <Modal
-      visible={visible}
-      transparent
+      visible={Boolean(visible)}
+      transparent={true}
       animationType="none"
       onRequestClose={onClose}
     >

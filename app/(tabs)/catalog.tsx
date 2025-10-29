@@ -19,7 +19,9 @@ import { Button } from '../../src/components/ui/Button';
 import { useTheme } from '../../src/theme/ThemeProvider';
 
 export default function CatalogScreen() {
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high'>('newest');
@@ -103,7 +105,7 @@ export default function CatalogScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container}>
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
@@ -129,7 +131,7 @@ export default function CatalogScreen() {
           data={[{ id: null, name: 'All' }, ...(categories || [])]}
           renderItem={renderCategory}
           keyExtractor={(item) => item.id || 'all'}
-          horizontal
+          horizontal={true}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesList}
         />
@@ -171,7 +173,7 @@ export default function CatalogScreen() {
             columnWrapperStyle={styles.productRow}
             contentContainerStyle={styles.productsList}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} />
             }
             ListEmptyComponent={
               <View style={styles.emptyContainer}>

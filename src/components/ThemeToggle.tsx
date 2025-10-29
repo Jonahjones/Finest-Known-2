@@ -4,7 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 
 export function ThemeToggle() {
-  const { isLuxeTheme, toggleTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, toggleTheme, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
 
   return (
     <TouchableOpacity 

@@ -216,7 +216,7 @@ export function LivePricesTicker({ onPricePress }: LivePricesTickerProps) {
           await handleSignOut();
           setMenuVisible(false);
         }}
-        isLoggedIn={!!user && !!session} // Check if user and session exist
+        isLoggedIn={Boolean(user && session)} // Check if user and session exist
         cartItemCount={cartItemCount}
         userName={userName}
       />

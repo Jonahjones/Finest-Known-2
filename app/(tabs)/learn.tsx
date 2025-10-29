@@ -75,7 +75,9 @@ const categories = [
 ];
 
 export default function LearnScreen() {
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
@@ -157,7 +159,7 @@ export default function LearnScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Learn & Resources</Text>
         <TouchableOpacity>
@@ -190,7 +192,7 @@ export default function LearnScreen() {
           data={categories}
           renderItem={renderCategory}
           keyExtractor={(item) => item.id}
-          horizontal
+          horizontal={true}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesList}
         />
@@ -204,7 +206,7 @@ export default function LearnScreen() {
             data={featuredArticles}
             renderItem={renderArticle}
             keyExtractor={(item) => item.id}
-            horizontal
+            horizontal={true}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.featuredList}
           />
@@ -223,7 +225,7 @@ export default function LearnScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.articlesList}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} />
           }
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={

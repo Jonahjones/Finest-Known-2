@@ -8,7 +8,8 @@ export async function getOrCreateCart() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      throw new Error('User not authenticated');
+      // Silent return for unauthenticated users - cart requires auth
+      return null;
     }
 
     // Check if user already has a cart
@@ -39,8 +40,11 @@ export async function getOrCreateCart() {
 
     return newCart;
   } catch (error) {
-    console.error('Error in getOrCreateCart:', error);
-    throw error;
+    // Only log actual errors, not auth issues
+    if (error instanceof Error && !error.message.includes('authenticated')) {
+      console.error('Error in getOrCreateCart:', error);
+    }
+    return null;
   }
 }
 
@@ -96,6 +100,10 @@ export async function listCartItems(): Promise<CartItem[]> {
   try {
     const cart = await getOrCreateCart();
     
+    if (!cart) {
+      return []; // No cart for unauthenticated users
+    }
+    
     const { data, error } = await supabase
       .from('cart_items')
       .select(`
@@ -111,8 +119,8 @@ export async function listCartItems(): Promise<CartItem[]> {
 
     return data || [];
   } catch (error) {
-    console.error('Error in listCartItems:', error);
-    throw error;
+    // Silently return empty array for errors (like auth issues)
+    return [];
   }
 }
 

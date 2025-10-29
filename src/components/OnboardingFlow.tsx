@@ -97,7 +97,7 @@ export function OnboardingFlow() {
               placeholder="Password"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
+              secureTextEntry={true}
               autoCapitalize="none"
             />
 
@@ -107,7 +107,7 @@ export function OnboardingFlow() {
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                secureTextEntry
+                secureTextEntry={true}
                 autoCapitalize="none"
               />
             )}

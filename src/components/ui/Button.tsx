@@ -33,27 +33,28 @@ export function Button({
   style,
   textStyle,
 }: ButtonProps) {
+  const isDisabled = Boolean(disabled);
   const buttonStyle = [
     styles.base,
     styles[variant],
     styles[`${size}Size`],
-    disabled && styles.disabled,
+    isDisabled ? styles.disabled : null,
     style,
-  ];
+  ].filter(Boolean);
 
   const textStyleCombined = [
     styles.text,
     styles[`${variant}Text`],
     styles[`${size}Text`],
-    disabled && styles.disabledText,
+    isDisabled ? styles.disabledText : null,
     textStyle,
-  ];
+  ].filter(Boolean);
 
   return (
     <TouchableOpacity
       style={buttonStyle}
       onPress={onPress}
-      disabled={disabled || loading}
+      disabled={Boolean(disabled || loading)}
       activeOpacity={0.8}
     >
       {loading ? (

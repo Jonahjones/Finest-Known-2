@@ -92,7 +92,14 @@ const PERSONA_MAPPING = {
   }
 };
 
-export const useOnboardingStore = create<OnboardingState>()(
+export const useOnboardingStore = create<OnboardingState & {
+  startOnboarding: () => void;
+  answerQuestion: (questionId: string, answer: string) => void;
+  nextStep: () => void;
+  skipOnboarding: () => void;
+  completeOnboarding: () => void;
+  resetOnboarding: () => void;
+}>()(
   persist(
     (set, get) => ({
       currentStep: 0,
@@ -161,7 +168,14 @@ export const useOnboardingStore = create<OnboardingState>()(
         persona: state.persona,
         isCompleted: state.isCompleted,
         isSkipped: state.isSkipped
-      })
+      }),
+      // Ensure booleans are properly parsed when hydrating from storage
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isCompleted = Boolean(state.isCompleted);
+          state.isSkipped = Boolean(state.isSkipped);
+        }
+      }
     }
   )
 );

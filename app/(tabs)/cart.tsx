@@ -18,7 +18,9 @@ import { colors, spacing, typography } from '../../src/design/tokens';
 import { router } from 'expo-router';
 
 export default function CartScreen() {
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const {
     cartItems,
     loading,
@@ -109,7 +111,7 @@ export default function CartScreen() {
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={() => updateQuantity(item.product_id, item.quantity - 1)}
-              disabled={item.quantity <= 1}
+              disabled={Boolean(item.quantity <= 1)}
             >
               <Ionicons name="remove" size={16} color={colors.text.primary} />
             </TouchableOpacity>
@@ -182,7 +184,7 @@ export default function CartScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Shopping Cart</Text>
         <TouchableOpacity onPress={handleClearCart}>

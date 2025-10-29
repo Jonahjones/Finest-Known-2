@@ -21,7 +21,9 @@ import { getUserAddresses, addAddress, deleteAddress, Address } from '../../src/
 import { getUserOrders } from '../../src/api/checkout';
 
 export default function AccountScreen() {
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const { user, signOut } = useAuth();
   const [email, setEmail] = useState(user?.email || '');
   const [displayName, setDisplayName] = useState('');
@@ -138,19 +140,19 @@ export default function AccountScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
-      <View style={[styles.header, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+    <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]}>
+      <View style={[styles.header, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={isLuxeTheme ? tokens.colors.text : "#000"} />
         </TouchableOpacity>
-        <Text style={[styles.title, isLuxeTheme && { color: tokens.colors.text }]}>Account</Text>
+        <Text style={[styles.title, isLuxeTheme ? { color: tokens.colors.text } : null]}>Account</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <ScrollView style={styles.scrollView}>
         {/* Profile Section */}
-        <View style={[styles.section, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+        <View style={[styles.section, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Profile
           </Text>
 
@@ -163,21 +165,21 @@ export default function AccountScreen() {
               />
             </View>
             <View style={styles.profileInfo}>
-              <Text style={[styles.profileName, isLuxeTheme && { color: tokens.colors.text }]}>
+              <Text style={[styles.profileName, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                 {displayName || firstName || lastName || user?.email?.split('@')[0] || 'User'}
               </Text>
-              <Text style={[styles.profileEmail, isLuxeTheme && { color: tokens.colors.muted }]}>
+              <Text style={[styles.profileEmail, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                 {email}
               </Text>
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               Display Name
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line } : null]}
               value={displayName}
               onChangeText={setDisplayName}
               placeholder="Enter display name"
@@ -186,11 +188,11 @@ export default function AccountScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               First Name
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line } : null]}
               value={firstName}
               onChangeText={setFirstName}
               placeholder="Enter first name"
@@ -199,11 +201,11 @@ export default function AccountScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               Last Name
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line } : null]}
               value={lastName}
               onChangeText={setLastName}
               placeholder="Enter last name"
@@ -212,11 +214,11 @@ export default function AccountScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               Phone Number
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line } : null]}
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               placeholder="Enter phone number"
@@ -226,44 +228,44 @@ export default function AccountScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.updateButton, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}
+            style={[styles.updateButton, isLuxeTheme ? { backgroundColor: tokens.colors.gold } : null]}
             onPress={handleUpdateProfile}
-            disabled={loading}
+            disabled={Boolean(loading)}
           >
-            <Text style={[styles.updateButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+            <Text style={[styles.updateButtonText, isLuxeTheme ? { color: tokens.colors.bg } : null]}>
               {loading ? 'Updating...' : 'Update Profile'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Account Information */}
-        <View style={[styles.section, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+        <View style={[styles.section, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Account Information
           </Text>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               Email Address
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line } : null]}
               value={email}
               editable={false}
               placeholder="Email address"
               placeholderTextColor={isLuxeTheme ? tokens.colors.muted : "#999"}
             />
-            <Text style={[styles.inputHint, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputHint, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               Email cannot be changed
             </Text>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               User ID
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.muted, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.muted, borderColor: tokens.colors.line } : null]}
               value={user?.id || ''}
               editable={false}
               placeholder="User ID"
@@ -273,17 +275,17 @@ export default function AccountScreen() {
         </View>
 
         {/* Change Password */}
-        <View style={[styles.section, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+        <View style={[styles.section, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Change Password
           </Text>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               Current Password
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line } : null]}
               value={currentPassword}
               onChangeText={setCurrentPassword}
               secureTextEntry
@@ -293,11 +295,11 @@ export default function AccountScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               New Password
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line } : null]}
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry
@@ -307,11 +309,11 @@ export default function AccountScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.inputLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               Confirm New Password
             </Text>
             <TextInput
-              style={[styles.input, isLuxeTheme && { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line }]}
+              style={[styles.input, isLuxeTheme ? { backgroundColor: tokens.colors.surface, color: tokens.colors.text, borderColor: tokens.colors.line } : null]}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
@@ -321,19 +323,19 @@ export default function AccountScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.updateButton, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}
+            style={[styles.updateButton, isLuxeTheme ? { backgroundColor: tokens.colors.gold } : null]}
             onPress={handleUpdatePassword}
-            disabled={loading}
+            disabled={Boolean(loading)}
           >
-            <Text style={[styles.updateButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+            <Text style={[styles.updateButtonText, isLuxeTheme ? { color: tokens.colors.bg } : null]}>
               {loading ? 'Updating...' : 'Update Password'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Notifications */}
-        <View style={[styles.section, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+        <View style={[styles.section, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Notifications
           </Text>
 
@@ -345,16 +347,16 @@ export default function AccountScreen() {
                 color={isLuxeTheme ? tokens.colors.text : "#000"} 
               />
               <View style={styles.settingText}>
-                <Text style={[styles.settingTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+                <Text style={[styles.settingTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                   Push Notifications
                 </Text>
-                <Text style={[styles.settingDescription, isLuxeTheme && { color: tokens.colors.muted }]}>
+                <Text style={[styles.settingDescription, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                   Receive push notifications on your device
                 </Text>
               </View>
             </View>
             <Switch
-              value={pushNotifications}
+              value={Boolean(pushNotifications)}
               onValueChange={setPushNotifications}
               trackColor={{ false: '#767577', true: isLuxeTheme ? tokens.colors.gold : '#00D4AA' }}
               thumbColor={pushNotifications ? '#FFFFFF' : '#f4f3f4'}
@@ -369,16 +371,16 @@ export default function AccountScreen() {
                 color={isLuxeTheme ? tokens.colors.text : "#000"} 
               />
               <View style={styles.settingText}>
-                <Text style={[styles.settingTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+                <Text style={[styles.settingTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                   Email Notifications
                 </Text>
-                <Text style={[styles.settingDescription, isLuxeTheme && { color: tokens.colors.muted }]}>
+                <Text style={[styles.settingDescription, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                   Receive email notifications about your account
                 </Text>
               </View>
             </View>
             <Switch
-              value={emailNotifications}
+              value={Boolean(emailNotifications)}
               onValueChange={setEmailNotifications}
               trackColor={{ false: '#767577', true: isLuxeTheme ? tokens.colors.gold : '#00D4AA' }}
               thumbColor={emailNotifications ? '#FFFFFF' : '#f4f3f4'}
@@ -387,17 +389,17 @@ export default function AccountScreen() {
         </View>
 
         {/* Orders / Portfolio */}
-        <View style={[styles.section, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+        <View style={[styles.section, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Portfolio & Orders
           </Text>
 
           {ordersLoading ? (
-            <Text style={[styles.emptyText, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.emptyText, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               Loading orders...
             </Text>
           ) : orders.length === 0 ? (
-            <Text style={[styles.emptyText, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.emptyText, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               You haven't made any purchases yet.
             </Text>
           ) : (
@@ -405,10 +407,10 @@ export default function AccountScreen() {
               <View key={order.id} style={styles.orderCard}>
                 <View style={styles.orderHeader}>
                   <View>
-                    <Text style={[styles.orderNumber, isLuxeTheme && { color: tokens.colors.text }]}>
+                    <Text style={[styles.orderNumber, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                       Order #{order.id.slice(0, 8)}
                     </Text>
-                    <Text style={[styles.orderDate, isLuxeTheme && { color: tokens.colors.muted }]}>
+                    <Text style={[styles.orderDate, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                       {new Date(order.created_at).toLocaleDateString()}
                     </Text>
                   </View>
@@ -420,10 +422,10 @@ export default function AccountScreen() {
                 {order.order_items?.map((item: any, index: number) => (
                   <View key={item.id || index} style={styles.orderItem}>
                     <View style={styles.orderItemInfo}>
-                      <Text style={[styles.orderItemTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+                      <Text style={[styles.orderItemTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                         {item.product?.title || 'Product'}
                       </Text>
-                      <Text style={[styles.orderItemDetails, isLuxeTheme && { color: tokens.colors.muted }]}>
+                      <Text style={[styles.orderItemDetails, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                         Qty: {item.quantity} × {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((item.price_cents || 0) / 100)}
                       </Text>
                     </View>
@@ -431,10 +433,10 @@ export default function AccountScreen() {
                 ))}
 
                 <View style={styles.orderTotal}>
-                  <Text style={[styles.orderTotalLabel, isLuxeTheme && { color: tokens.colors.text }]}>
+                  <Text style={[styles.orderTotalLabel, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                     Total:
                   </Text>
-                  <Text style={[styles.orderTotalValue, isLuxeTheme && { color: tokens.colors.gold }]}>
+                  <Text style={[styles.orderTotalValue, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
                     {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((order.total_cents || 0) / 100)}
                   </Text>
                 </View>
@@ -446,7 +448,7 @@ export default function AccountScreen() {
         {/* Sign Out */}
         <View style={styles.signOutSection}>
           <TouchableOpacity
-            style={[styles.signOutButton, isLuxeTheme && { backgroundColor: tokens.colors.danger }]}
+            style={[styles.signOutButton, isLuxeTheme ? { backgroundColor: tokens.colors.danger } : null]}
             onPress={handleSignOut}
           >
             <Ionicons name="log-out-outline" size={20} color="#FFFFFF" />

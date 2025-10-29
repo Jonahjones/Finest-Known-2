@@ -40,7 +40,9 @@ interface PersonalizedGalleryProps {
 export function PersonalizedGallery({ persona, onItemPress, onContinue }: PersonalizedGalleryProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const { user, session, loading: authLoading } = useAuth();
   
   const personaConfig = PERSONA_CONFIGS[persona];
@@ -116,11 +118,11 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
         key={product.id}
         style={[
           styles.productCard,
-          isLuxeTheme && {
+          isLuxeTheme ? {
             backgroundColor: tokens.colors.surface,
             borderColor: tokens.colors.line,
             borderWidth: 1,
-          }
+          } : null
         ]}
         onPress={() => {
           console.log('PersonalizedGallery: Product card pressed:', product.title, 'ID:', product.id);
@@ -148,7 +150,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           {product.primary_image_url ? (
             <Image source={{ uri: product.primary_image_url }} style={styles.productImage} />
           ) : (
-            <View style={[styles.productImagePlaceholder, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+            <View style={[styles.productImagePlaceholder, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
               <Ionicons 
                 name="diamond-outline" 
                 size={32} 
@@ -162,7 +164,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           <Text 
             style={[
               styles.productTitle,
-              isLuxeTheme && { color: tokens.colors.text }
+              isLuxeTheme ? { color: tokens.colors.text } : null
             ]}
             numberOfLines={2}
           >
@@ -172,7 +174,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           <Text 
             style={[
               styles.productPrice,
-              isLuxeTheme && { color: tokens.colors.gold }
+              isLuxeTheme ? { color: tokens.colors.gold } : null
             ]}
           >
             {formatPrice(product.retail_price_cents)}
@@ -182,7 +184,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
             <Text 
               style={[
                 styles.productMetal,
-                isLuxeTheme && { color: tokens.colors.muted }
+                isLuxeTheme ? { color: tokens.colors.muted } : null
               ]}
             >
               {product.metal_type} • {product.weight_grams}g
@@ -191,7 +193,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
               <Text 
                 style={[
                   styles.productYear,
-                  isLuxeTheme && { color: tokens.colors.muted }
+                  isLuxeTheme ? { color: tokens.colors.muted } : null
                 ]}
               >
                 {product.year}
@@ -206,7 +208,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
   // Check if user is authenticated
   if (!user || !session) {
     return (
-      <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]}>
+      <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]}>
         <View style={styles.loadingContainer}>
           <Ionicons 
             name="warning-outline" 
@@ -216,7 +218,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           <Text 
             style={[
               styles.loadingText,
-              isLuxeTheme && { color: tokens.colors.text }
+              isLuxeTheme ? { color: tokens.colors.text } : null
             ]}
           >
             Authentication Error
@@ -224,16 +226,16 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           <Text 
             style={[
               styles.loadingText,
-              isLuxeTheme && { color: tokens.colors.muted }
+              isLuxeTheme ? { color: tokens.colors.muted } : null
             ]}
           >
             You need to be logged in to see personalized recommendations.
           </Text>
           <TouchableOpacity 
-            style={[styles.continueButton, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}
+            style={[styles.continueButton, isLuxeTheme ? { backgroundColor: tokens.colors.gold } : null]}
             onPress={onContinue}
           >
-            <Text style={[styles.continueButtonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+            <Text style={[styles.continueButtonText, isLuxeTheme ? { color: tokens.colors.bg } : null]}>
               Continue to Marketplace
             </Text>
           </TouchableOpacity>
@@ -244,7 +246,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]}>
+      <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator 
             size="large" 
@@ -253,7 +255,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           <Text 
             style={[
               styles.loadingText,
-              isLuxeTheme && { color: tokens.colors.text }
+              isLuxeTheme ? { color: tokens.colors.text } : null
             ]}
           >
             Finding perfect items for you...
@@ -264,7 +266,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
   }
 
   return (
-    <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]} edges={['bottom']}>
       <ScrollView style={styles.scrollView} pointerEvents="auto">
         {/* Header */}
         <View style={styles.header}>
@@ -272,7 +274,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
             <Text 
               style={[
                 styles.welcomeTitle,
-                isLuxeTheme && { color: tokens.colors.text }
+                isLuxeTheme ? { color: tokens.colors.text } : null
               ]}
             >
               Welcome to your personalized vault
@@ -280,7 +282,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
             <Text 
               style={[
                 styles.personaDescription,
-                isLuxeTheme && { color: tokens.colors.muted }
+                isLuxeTheme ? { color: tokens.colors.muted } : null
               ]}
             >
               Based on your preferences, here are some items we think you'll love.
@@ -293,7 +295,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           <Text 
             style={[
               styles.sectionTitle,
-              isLuxeTheme && { color: tokens.colors.text }
+              isLuxeTheme ? { color: tokens.colors.text } : null
             ]}
           >
             Recommended for you
@@ -313,7 +315,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
               <Text 
                 style={[
                   styles.emptyText,
-                  isLuxeTheme && { color: tokens.colors.muted }
+                  isLuxeTheme ? { color: tokens.colors.muted } : null
                 ]}
               >
                 No items found for your preferences yet.
@@ -321,7 +323,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
               <Text 
                 style={[
                   styles.emptySubtext,
-                  isLuxeTheme && { color: tokens.colors.muted }
+                  isLuxeTheme ? { color: tokens.colors.muted } : null
                 ]}
               >
                 Check back soon for new additions!
@@ -335,18 +337,18 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           <TouchableOpacity
             style={[
               styles.continueButton,
-              isLuxeTheme && {
+              isLuxeTheme ? {
                 backgroundColor: 'transparent',
                 borderColor: tokens.colors.gold,
                 borderWidth: 1,
-              }
+              } : null
             ]}
             onPress={onContinue}
           >
             <Text 
               style={[
                 styles.continueButtonText,
-                isLuxeTheme && { color: tokens.colors.text }
+                isLuxeTheme ? { color: tokens.colors.text } : null
               ]}
             >
               Continue to Marketplace
@@ -362,12 +364,12 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
           <TouchableOpacity
             style={[
               styles.continueButton,
-              isLuxeTheme && {
+              isLuxeTheme ? {
                 backgroundColor: tokens.colors.gold,
                 borderColor: tokens.colors.gold,
                 borderWidth: 1,
                 marginTop: 8,
-              }
+              } : null
             ]}
             onPress={() => {
               console.log('Test navigation button pressed');
@@ -378,7 +380,7 @@ export function PersonalizedGallery({ persona, onItemPress, onContinue }: Person
             <Text 
               style={[
                 styles.continueButtonText,
-                isLuxeTheme && { color: tokens.colors.bg }
+                isLuxeTheme ? { color: tokens.colors.bg } : null
               ]}
             >
               Test Navigation

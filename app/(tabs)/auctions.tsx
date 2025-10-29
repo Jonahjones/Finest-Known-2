@@ -23,7 +23,9 @@ export default function AuctionsScreen() {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'live' | 'ending'>('all');
   const [auctions, setAuctions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
 
   React.useEffect(() => {
     fetchAuctions();
@@ -218,7 +220,7 @@ export default function AuctionsScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, luxeStyles.container]} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, luxeStyles.container]}>
       <View style={[styles.header, luxeStyles.header]}>
         <Text style={[styles.title, luxeStyles.title]}>Live Auctions</Text>
         <TouchableOpacity>
@@ -235,17 +237,17 @@ export default function AuctionsScreen() {
       {loading ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="hourglass-outline" size={48} color={isLuxeTheme ? tokens.colors.muted : colors.text.secondary} />
-          <Text style={[styles.emptyTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+          <Text style={[styles.emptyTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Loading Special Events...
           </Text>
         </View>
       ) : auctions.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="calendar-outline" size={64} color={isLuxeTheme ? tokens.colors.muted : colors.text.secondary} />
-          <Text style={[styles.emptyTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+          <Text style={[styles.emptyTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             No Special Auctions Currently
           </Text>
-          <Text style={[styles.emptySubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>
+          <Text style={[styles.emptySubtitle, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
             Check back soon for our next exclusive auction event
           </Text>
         </View>
@@ -256,7 +258,7 @@ export default function AuctionsScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.auctionsList}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} />
           }
           showsVerticalScrollIndicator={false}
         />

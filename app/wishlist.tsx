@@ -18,7 +18,9 @@ import { colors, spacing, typography } from '../src/design/tokens';
 import { router, useFocusEffect } from 'expo-router';
 
 export default function WishlistScreen() {
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const { wishlistItems, loading, error, removeFromWishlist, refreshWishlist } = useWishlist();
   const { addToCart } = useCart();
 
@@ -163,7 +165,7 @@ export default function WishlistScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My Wishlist</Text>
       </View>

@@ -63,30 +63,27 @@ function PCGSMarketDataComponent({
   const priceDisplay = priceValue > 0 ? `$${(priceValue / 100).toFixed(2)}` : '$0.00';
   const bidDisplay = bidValue > 0 ? `$${(bidValue / 100).toFixed(2)}` : '$0.00';
   const askDisplay = askValue > 0 ? `$${(askValue / 100).toFixed(2)}` : '$0.00';
-
-  // Ensure boolean type to prevent Java casting errors
-  const isLuxe = Boolean(isLuxeTheme);
   
   return (
-    <View style={[styles.pcgsDataCard, isLuxe ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
+    <View style={[styles.pcgsDataCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
       <View style={styles.sectionHeader}>
-        <Ionicons name="analytics-outline" size={20} color={isLuxe ? tokens.colors.gold : "#00D4AA"} />
-        <Text style={[styles.sectionTitle, isLuxe ? { color: tokens.colors.text } : null]}>
+        <Ionicons name="analytics-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
+        <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
           Market Data
         </Text>
       </View>
 
       {/* Population Stats */}
       <View style={styles.statsRow}>
-        <View style={[styles.statBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
-          <Text style={[styles.statLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Population</Text>
-          <Text style={[styles.statValue, isLuxe ? { color: tokens.colors.text } : null]}>
+        <View style={[styles.statBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.statLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Population</Text>
+          <Text style={[styles.statValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             {populationStr}
           </Text>
         </View>
-        <View style={[styles.statBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
-          <Text style={[styles.statLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Higher</Text>
-          <Text style={[styles.statValue, isLuxe ? { color: tokens.colors.text } : null]}>
+        <View style={[styles.statBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.statLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Higher</Text>
+          <Text style={[styles.statValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             {populationHigherStr}
           </Text>
         </View>
@@ -95,21 +92,21 @@ function PCGSMarketDataComponent({
       {/* Price Guide */}
       {coinData.PriceGuideInfo && (
         <View style={styles.priceRow}>
-          <View style={[styles.priceBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
-            <Text style={[styles.priceLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Price</Text>
-            <Text style={[styles.priceValue, isLuxe ? { color: tokens.colors.gold } : null]}>
+          <View style={[styles.priceBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+            <Text style={[styles.priceLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Price</Text>
+            <Text style={[styles.priceValue, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
               {priceDisplay}
             </Text>
           </View>
-          <View style={[styles.priceBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
-            <Text style={[styles.priceLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Bid</Text>
-            <Text style={[styles.priceValue, isLuxe ? { color: tokens.colors.text } : null]}>
+          <View style={[styles.priceBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+            <Text style={[styles.priceLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Bid</Text>
+            <Text style={[styles.priceValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>
               {bidDisplay}
             </Text>
           </View>
-          <View style={[styles.priceBox, isLuxe ? { backgroundColor: tokens.colors.bgElev } : null]}>
-            <Text style={[styles.priceLabel, isLuxe ? { color: tokens.colors.muted } : null]}>Ask</Text>
-            <Text style={[styles.priceValue, isLuxe ? { color: tokens.colors.text } : null]}>
+          <View style={[styles.priceBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+            <Text style={[styles.priceLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Ask</Text>
+            <Text style={[styles.priceValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>
               {askDisplay}
             </Text>
           </View>
@@ -121,17 +118,21 @@ function PCGSMarketDataComponent({
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams();
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const { user } = useAuth();
   const [product, setProduct] = React.useState<Product | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [isInWishlistState, setIsInWishlistState] = React.useState(false);
   
   // PCGS Verification
-  const { verification: pcgsVerification, coinData, loading: pcgsLoading } = usePCGSVerification(
+  const { verification: pcgsVerification, coinData, loading: pcgsLoadingRaw } = usePCGSVerification(
     product?.cert_number || null,
     product?.grade || null
   );
+  // Ensure boolean type to prevent Java casting errors
+  const pcgsLoading = Boolean(pcgsLoadingRaw);
 
   console.log('ItemDetailScreen: Component loaded with ID:', id);
 
@@ -248,9 +249,9 @@ export default function ItemDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
+      <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]}>
         <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, isLuxeTheme && { color: tokens.colors.text }]}>
+          <Text style={[styles.loadingText, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Loading product details...
           </Text>
         </View>
@@ -260,9 +261,9 @@ export default function ItemDetailScreen() {
 
   if (!product) {
     return (
-      <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
+      <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]}>
         <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, isLuxeTheme && { color: tokens.colors.text }]}>
+          <Text style={[styles.loadingText, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Product not found
           </Text>
         </View>
@@ -271,14 +272,14 @@ export default function ItemDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]}>
       <ScrollView style={styles.scrollView}>
         {/* Header */}
-        <View style={[styles.header, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+        <View style={[styles.header, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color={isLuxeTheme ? tokens.colors.text : "#000"} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+          <Text style={[styles.headerTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             Item Details
           </Text>
           <TouchableOpacity onPress={handleAddToWishlist}>
@@ -291,7 +292,7 @@ export default function ItemDetailScreen() {
           {product.primary_image_url ? (
             <Image source={{ uri: product.primary_image_url }} style={styles.productImage} />
           ) : (
-            <View style={[styles.imagePlaceholder, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
+            <View style={[styles.imagePlaceholder, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
               <Ionicons 
                 name="diamond-outline" 
                 size={80} 
@@ -302,66 +303,66 @@ export default function ItemDetailScreen() {
         </View>
 
         {/* Product Info */}
-        <View style={[styles.productInfo, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line }]}>
-          <Text style={[styles.productTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+        <View style={[styles.productInfo, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
+          <Text style={[styles.productTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             {product.title}
           </Text>
           
-          <Text style={[styles.productPrice, isLuxeTheme && { color: tokens.colors.gold }]}>
+          <Text style={[styles.productPrice, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
             {formatPrice(product.retail_price_cents)}
           </Text>
           
           <View style={styles.productMeta}>
-            <Text style={[styles.productMetal, isLuxeTheme && { color: tokens.colors.muted }]}>
+            <Text style={[styles.productMetal, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
               {product.metal_type} • {product.weight_grams}g
             </Text>
             {product.year && (
-              <Text style={[styles.productYear, isLuxeTheme && { color: tokens.colors.muted }]}>
+              <Text style={[styles.productYear, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                 {product.year}
               </Text>
             )}
           </View>
           
-          <Text style={[styles.productDescription, isLuxeTheme && { color: tokens.colors.text }]}>
+          <Text style={[styles.productDescription, isLuxeTheme ? { color: tokens.colors.text } : null]}>
             {product.description}
           </Text>
         </View>
 
         {/* PCGS Verification - Show for any product with cert_number */}
         {product.cert_number && (
-          <View style={[styles.verificationCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line }]}>
+          <View style={[styles.verificationCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
             <View style={styles.verificationHeader}>
               <Ionicons name="shield-checkmark" size={24} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
-              <Text style={[styles.verificationTitle, isLuxeTheme && { color: tokens.colors.text }]}>
+              <Text style={[styles.verificationTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                 PCGS Certified
               </Text>
             </View>
             
             {pcgsLoading ? (
-              <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.muted }]}>
+              <Text style={[styles.verificationText, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                 Verifying certification...
               </Text>
-            ) : pcgsVerification?.verified ? (
+            ) : Boolean(pcgsVerification?.verified) ? (
               <View>
-                <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.text }]}>
+                <Text style={[styles.verificationText, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                   Grade: {product.grade}
                 </Text>
-                <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.muted }]}>
+                <Text style={[styles.verificationText, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                   Cert #: {product.cert_number}
                 </Text>
-                <Text style={[styles.verificationBadge, isLuxeTheme && { color: tokens.colors.success }]}>
+                <Text style={[styles.verificationBadge, isLuxeTheme ? { color: tokens.colors.success } : null]}>
                   ✓ Verified by PCGS
                 </Text>
               </View>
             ) : (
               <View>
-                <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.text }]}>
+                <Text style={[styles.verificationText, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                   Grade: {product.grade}
                 </Text>
-                <Text style={[styles.verificationText, isLuxeTheme && { color: tokens.colors.muted }]}>
+                <Text style={[styles.verificationText, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                   Cert #: {product.cert_number}
                 </Text>
-                <Text style={[styles.verificationBadge, isLuxeTheme && { color: tokens.colors.muted }]}>
+                <Text style={[styles.verificationBadge, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                   Certification data pending
                 </Text>
               </View>
@@ -377,21 +378,21 @@ export default function ItemDetailScreen() {
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity 
-            style={[styles.addToCartButton, isLuxeTheme && { backgroundColor: tokens.colors.gold }]}
+            style={[styles.addToCartButton, isLuxeTheme ? { backgroundColor: tokens.colors.gold } : null]}
             onPress={handleAddToCart}
           >
             <Ionicons name="cart-outline" size={20} color={isLuxeTheme ? tokens.colors.bg : "#000"} />
-            <Text style={[styles.buttonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+            <Text style={[styles.buttonText, isLuxeTheme ? { color: tokens.colors.bg } : null]}>
               Add to Cart
             </Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.purchaseNowButton, isLuxeTheme && { backgroundColor: tokens.colors.success }]}
+            style={[styles.purchaseNowButton, isLuxeTheme ? { backgroundColor: tokens.colors.success } : null]}
             onPress={handlePurchaseNow}
           >
             <Ionicons name="card-outline" size={20} color={isLuxeTheme ? tokens.colors.bg : "#FFFFFF"} />
-            <Text style={[styles.buttonText, isLuxeTheme && { color: tokens.colors.bg }]}>
+            <Text style={[styles.buttonText, isLuxeTheme ? { color: tokens.colors.bg } : null]}>
               Purchase Now
             </Text>
           </TouchableOpacity>
@@ -400,11 +401,11 @@ export default function ItemDetailScreen() {
         {/* Wishlist Button */}
         <View style={styles.wishlistContainer}>
           <TouchableOpacity 
-            style={[styles.wishlistButton, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.gold }]}
+            style={[styles.wishlistButton, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.gold } : null]}
             onPress={handleAddToWishlist}
           >
             <Ionicons name={isInWishlistState ? "heart" : "heart-outline"} size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
-            <Text style={[styles.wishlistButtonText, isLuxeTheme && { color: tokens.colors.gold }]}>
+            <Text style={[styles.wishlistButtonText, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
               {isInWishlistState ? "Remove from Wishlist" : "Add to Wishlist"}
             </Text>
           </TouchableOpacity>

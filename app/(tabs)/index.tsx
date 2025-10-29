@@ -15,7 +15,9 @@ import { useAuth } from '../../src/store/AuthContext';
 import { supabase } from '../../src/lib/supabase';
 
 export default function HomeScreen() {
-  const { isLuxeTheme, tokens } = useTheme();
+  const { isLuxeTheme: isLuxeThemeRaw, tokens } = useTheme();
+  // Ensure boolean type to prevent Java casting errors on React Native bridge
+  const isLuxeTheme = Boolean(isLuxeThemeRaw);
   const { user } = useAuth();
   const [featuredProducts, setFeaturedProducts] = React.useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = React.useState(true);
@@ -64,11 +66,11 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, isLuxeTheme && { backgroundColor: tokens.colors.bg }]} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, isLuxeTheme ? { backgroundColor: tokens.colors.bg } : null]}>
       <ScrollView style={styles.scrollView}>
         {/* Header */}
-        <View style={[styles.header, isLuxeTheme && { backgroundColor: tokens.colors.bgElev }]}>
-          <Text style={[styles.logo, isLuxeTheme && { color: tokens.colors.text }]}>FinestKnown</Text>
+          <View style={[styles.header, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
+          <Text style={[styles.logo, isLuxeTheme ? { color: tokens.colors.text } : null]}>FinestKnown</Text>
           <View style={styles.headerRight}>
             <TouchableOpacity>
               <Ionicons name="search" size={24} color={isLuxeTheme ? tokens.colors.text : "#000"} />
@@ -81,22 +83,22 @@ export default function HomeScreen() {
         {/* Featured Products */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>Featured Products</Text>
+            <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>Featured Products</Text>
             <TouchableOpacity onPress={() => router.push('/catalog')}>
-              <Text style={[styles.viewAll, isLuxeTheme && { color: tokens.colors.gold }]}>View All</Text>
+              <Text style={[styles.viewAll, isLuxeTheme ? { color: tokens.colors.gold } : null]}>View All</Text>
             </TouchableOpacity>
           </View>
           
           {loadingProducts ? (
             <View style={styles.loadingContainer}>
-              <Text style={[styles.loadingText, isLuxeTheme && { color: tokens.colors.muted }]}>Loading products...</Text>
+              <Text style={[styles.loadingText, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Loading products...</Text>
             </View>
           ) : featuredProducts.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
               {featuredProducts.map((product) => (
                 <TouchableOpacity
                   key={product.id}
-                  style={[styles.productCard, isLuxeTheme && { backgroundColor: tokens.colors.bgElev, borderColor: tokens.colors.line, borderWidth: 1 }]}
+                  style={[styles.productCard, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev, borderColor: tokens.colors.line } : null]}
                   onPress={() => handleProductPress(product)}
                 >
                   <View style={styles.productImage}>
@@ -109,13 +111,13 @@ export default function HomeScreen() {
                     )}
                   </View>
                   <View style={styles.productInfo}>
-                    <Text style={[styles.productTitle, isLuxeTheme && { color: tokens.colors.text }]} numberOfLines={2}>
+                    <Text style={[styles.productTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
                       {product.title}
                     </Text>
-                    <Text style={[styles.productPrice, isLuxeTheme && { color: tokens.colors.gold }]}>
+                    <Text style={[styles.productPrice, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
                       {formatPrice(product.retail_price_cents)}
                     </Text>
-                    <Text style={[styles.productMetal, isLuxeTheme && { color: tokens.colors.muted }]}>
+                    <Text style={[styles.productMetal, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
                       {product.metal_type} • {product.weight_grams}g
                     </Text>
                   </View>
@@ -125,42 +127,42 @@ export default function HomeScreen() {
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="search-outline" size={48} color={isLuxeTheme ? tokens.colors.muted : '#6B7280'} />
-              <Text style={[styles.emptyText, isLuxeTheme && { color: tokens.colors.muted }]}>No featured products available</Text>
+              <Text style={[styles.emptyText, isLuxeTheme ? { color: tokens.colors.muted } : null]}>No featured products available</Text>
             </View>
           )}
         </View>
 
         {/* Categories */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, isLuxeTheme && { color: tokens.colors.text }]}>Shop by Category</Text>
+          <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>Shop by Category</Text>
           <View style={styles.categoriesGrid}>
-            <TouchableOpacity style={[styles.categoryCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line, borderWidth: 1 }]}>
-              <Text style={[styles.categoryTitle, isLuxeTheme && { color: tokens.colors.text }]}>Gold</Text>
-              <Text style={[styles.categorySubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>Premium gold products</Text>
+            <TouchableOpacity style={[styles.categoryCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
+              <Text style={[styles.categoryTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>Gold</Text>
+              <Text style={[styles.categorySubtitle, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Premium gold products</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.categoryCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line, borderWidth: 1 }]}>
-              <Text style={[styles.categoryTitle, isLuxeTheme && { color: tokens.colors.text }]}>Silver</Text>
-              <Text style={[styles.categorySubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>Silver coins & bars</Text>
+            <TouchableOpacity style={[styles.categoryCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
+              <Text style={[styles.categoryTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>Silver</Text>
+              <Text style={[styles.categorySubtitle, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Silver coins & bars</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.categoryCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line, borderWidth: 1 }]}>
-              <Text style={[styles.categoryTitle, isLuxeTheme && { color: tokens.colors.text }]}>Platinum</Text>
-              <Text style={[styles.categorySubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>Rare platinum items</Text>
+            <TouchableOpacity style={[styles.categoryCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
+              <Text style={[styles.categoryTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>Platinum</Text>
+              <Text style={[styles.categorySubtitle, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Rare platinum items</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.categoryCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line, borderWidth: 1 }]}>
-              <Text style={[styles.categoryTitle, isLuxeTheme && { color: tokens.colors.text }]}>Palladium</Text>
-              <Text style={[styles.categorySubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>Palladium collection</Text>
+            <TouchableOpacity style={[styles.categoryCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
+              <Text style={[styles.categoryTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>Palladium</Text>
+              <Text style={[styles.categorySubtitle, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Palladium collection</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Call to Action */}
-        <View style={[styles.ctaCard, isLuxeTheme && { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line, borderWidth: 1 }]}>
-          <Text style={[styles.ctaTitle, isLuxeTheme && { color: tokens.colors.text }]}>Start Your Collection</Text>
-          <Text style={[styles.ctaSubtitle, isLuxeTheme && { color: tokens.colors.muted }]}>
+        <View style={[styles.ctaCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
+          <Text style={[styles.ctaTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>Start Your Collection</Text>
+          <Text style={[styles.ctaSubtitle, isLuxeTheme ? { color: tokens.colors.muted } : null]}>
             Discover authentic precious metals with real-time pricing
           </Text>
-          <TouchableOpacity style={[styles.ctaButton, isLuxeTheme && { backgroundColor: 'transparent', borderColor: tokens.colors.gold, borderWidth: 1 }]}>
-            <Text style={[styles.ctaButtonText, isLuxeTheme && { color: tokens.colors.text }]}>Explore Catalog</Text>
+          <TouchableOpacity style={[styles.ctaButton, isLuxeTheme ? { backgroundColor: 'transparent', borderColor: tokens.colors.gold } : null]}>
+            <Text style={[styles.ctaButtonText, isLuxeTheme ? { color: tokens.colors.text } : null]}>Explore Catalog</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

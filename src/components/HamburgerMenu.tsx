@@ -98,8 +98,8 @@ export function HamburgerMenu({
 
   return (
     <Modal
-      visible={visible}
-      transparent
+      visible={Boolean(visible)}
+      transparent={true}
       animationType="none"
       onRequestClose={onClose}
     >

@@ -19,13 +19,13 @@ export default function RootLayout() {
               <View style={{ flex: 1 }}>
                 <LivePricesTicker />
                 <AppFlow />
-                <Stack>
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="auth" options={{ headerShown: false }} />
-                  <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: false }} />
-                  <Stack.Screen name="checkout" options={{ presentation: 'modal', headerShown: false }} />
-                  <Stack.Screen name="item/[id]" options={{ headerShown: false }} />
-                  <Stack.Screen name="catalog" options={{ headerShown: false }} />
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="auth" />
+                  <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+                  <Stack.Screen name="checkout" options={{ presentation: 'modal' }} />
+                  <Stack.Screen name="item/[id]" />
+                  <Stack.Screen name="catalog" />
                 </Stack>
               </View>
             </RealtimeProvider>
