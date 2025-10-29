@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { verifyPCGSCertification, PCGSVerification, PCGSCoinFacts, getPCGSCoinFacts, getPCGSPriceHistory, getPCGSPopulationHistory } from '../api/pcgs';
+import { verifyPCGSCertification, PCGSVerification, PCGSCoinFacts, getPCGSCoinFacts, getPCGSPriceHistory, getPCGSPopulationHistory, searchPCGSDatabase } from '../api/pcgs';
 
-export function usePCGSVerification(certNumber: string | null, grade: string | null) {
+export function usePCGSVerification(certNumber: string | null, grade: string | null, productTitle?: string, productYear?: number) {
   const [verification, setVerification] = useState<PCGSVerification | null>(null);
   const [coinData, setCoinData] = useState<PCGSCoinFacts | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,73 +22,74 @@ export function usePCGSVerification(certNumber: string | null, grade: string | n
         const result = await verifyPCGSCertification(certNumber, grade);
         setVerification(result);
 
-        // Always show market data for certified products (real or mock data)
         if (result?.verified) {
-          // If we have a valid PCGS number, try to fetch real API data
-          if (result.pcgs_no && result.pcgs_no > 0) {
+          let pcgsNumber = result.pcgs_no;
+
+          // If we don't have a valid PCGS number, try to find it by searching
+          if (!pcgsNumber || pcgsNumber === 0) {
+            if (productTitle) {
+              console.log(`Searching PCGS database for: ${productTitle} ${productYear || ''}`);
+              try {
+                const searchQuery = productYear ? `${productTitle} ${productYear}` : productTitle;
+                const searchResults = await searchPCGSDatabase(searchQuery);
+                
+                if (searchResults && searchResults.length > 0) {
+                  // Use the first match
+                  pcgsNumber = searchResults[0].PCGSNo || searchResults[0].pcgs_no;
+                  console.log(`Found PCGS number from search: ${pcgsNumber}`);
+                }
+              } catch (searchError) {
+                console.warn('Could not search PCGS database:', searchError);
+              }
+            }
+          }
+
+          // Fetch real PCGS market data
+          if (pcgsNumber && pcgsNumber > 0) {
             try {
-              const coinFacts = await getPCGSCoinFacts(result.pcgs_no, grade);
+              console.log(`Fetching PCGS data for PCGS#${pcgsNumber}, Grade: ${grade}`);
+              
+              const coinFacts = await getPCGSCoinFacts(pcgsNumber, grade);
+              
               if (coinFacts) {
-                // Fetch additional historical data
-                const priceHistory = await getPCGSPriceHistory(result.pcgs_no, grade);
-                const populationHistory = await getPCGSPopulationHistory(result.pcgs_no, grade);
+                console.log('Successfully fetched PCGS coin facts');
+                
+                // Fetch additional historical data in parallel
+                const [priceHistory, populationHistory] = await Promise.all([
+                  getPCGSPriceHistory(pcgsNumber, grade).catch(err => {
+                    console.warn('Could not fetch price history:', err);
+                    return [];
+                  }),
+                  getPCGSPopulationHistory(pcgsNumber, grade).catch(err => {
+                    console.warn('Could not fetch population history:', err);
+                    return [];
+                  })
+                ]);
                 
                 const fullCoinData: PCGSCoinFacts = {
                   ...coinFacts,
-                  PriceHistory: priceHistory,
-                  PopulationHistory: populationHistory,
+                  PriceHistory: priceHistory.length > 0 ? priceHistory : undefined,
+                  PopulationHistory: populationHistory.length > 0 ? populationHistory : undefined,
                 };
                 
                 setCoinData(fullCoinData);
+                console.log('PCGS market data loaded successfully');
               } else {
-                // Fallback mock data for demonstration
-                const mockData: PCGSCoinFacts = {
-                  PCGSNo: result.pcgs_no,
-                  Grade: grade,
-                  Population: 1250,
-                  PopulationHigher: 342,
-                  PriceGuideInfo: {
-                    Price: 125000, // in cents
-                    Bid: 118000,
-                    Ask: 132000,
-                  }
-                };
-                setCoinData(mockData);
+                console.warn('PCGS API returned no data');
+                setError('Unable to fetch PCGS market data');
               }
             } catch (dataError) {
-              console.warn('Could not fetch PCGS data, using mock data:', dataError);
-              // Use mock data as fallback
-              const mockData: PCGSCoinFacts = {
-                PCGSNo: result.pcgs_no,
-                Grade: grade,
-                Population: 1250,
-                PopulationHigher: 342,
-                PriceGuideInfo: {
-                  Price: 125000,
-                  Bid: 118000,
-                  Ask: 132000,
-                }
-              };
-              setCoinData(mockData);
+              console.error('Error fetching PCGS data:', dataError);
+              setError('Failed to fetch PCGS market data');
             }
           } else {
-            // No valid PCGS number, but still show mock market data for certified items
-            const mockData: PCGSCoinFacts = {
-              PCGSNo: 0,
-              Grade: grade,
-              Population: 847,
-              PopulationHigher: 156,
-              PriceGuideInfo: {
-                Price: 285000, // in cents (~$2,850)
-                Bid: 270000,   // (~$2,700)
-                Ask: 300000,   // (~$3,000)
-              }
-            };
-            setCoinData(mockData);
+            console.warn('No valid PCGS number available for market data lookup');
+            setError('PCGS number not available for this product');
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to verify PCGS certification');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to verify PCGS certification';
+        setError(errorMessage);
         console.error('Error verifying PCGS:', err);
       } finally {
         setLoading(false);
@@ -96,7 +97,7 @@ export function usePCGSVerification(certNumber: string | null, grade: string | n
     };
 
     fetchVerification();
-  }, [certNumber, grade]);
+  }, [certNumber, grade, productTitle, productYear]);
 
   return { verification, coinData, loading, error };
 }

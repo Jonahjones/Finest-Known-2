@@ -118,27 +118,36 @@ export async function getPCGSCoinFacts(
       return null;
     }
 
-    // Extract numeric grade from string (e.g., "MS65" -> 65)
-    const gradeMatch = grade.match(/MS(\d+)|AU(\d+)|XF(\d+)|VF(\d+)|F(\d+)|VG(\d+)|G(\d+)|P(\d+)/i);
-    const gradeNum = gradeMatch ? parseInt(gradeMatch[1] || gradeMatch[2] || gradeMatch[3] || gradeMatch[4] || gradeMatch[5] || gradeMatch[6] || gradeMatch[7] || gradeMatch[8] || '0') : 0;
+    // Extract numeric grade from string (e.g., "MS65" -> 65, "Recovered" -> handle specially)
+    let gradeNum = 0;
+    const gradeMatch = grade.match(/MS(\d+)|AU(\d+)|XF(\d+)|VF(\d+)|F(\d+)|VG(\d+)|G(\d+)|P(\d+)|PR(\d+)/i);
+    if (gradeMatch) {
+      gradeNum = parseInt(gradeMatch[1] || gradeMatch[2] || gradeMatch[3] || gradeMatch[4] || gradeMatch[5] || gradeMatch[6] || gradeMatch[7] || gradeMatch[8] || gradeMatch[9] || '0');
+    } else if (grade.toLowerCase() === 'recovered' || grade.toLowerCase() === 'genuine') {
+      // For non-numeric grades, use a default or skip the grade parameter
+      gradeNum = 0;
+    }
 
-    const response = await fetch(
-      `${PCGS_API_BASE_URL}/coindetail/GetCoinFactsByGrade?PCGSNo=${pcgsNo}&GradeNo=${gradeNum}&PlusGrade=${plusGrade}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${PCGS_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const url = `${PCGS_API_BASE_URL}/coindetail/GetCoinFactsByGrade?PCGSNo=${pcgsNo}&GradeNo=${gradeNum}&PlusGrade=${plusGrade}`;
+    console.log('PCGS API request:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${PCGS_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
 
     if (!response.ok) {
-      console.error('PCGS API returned error:', response.status);
+      const errorText = await response.text();
+      console.error('PCGS API error:', response.status, errorText);
       return null;
     }
 
     const data = await response.json();
+    console.log('PCGS API response:', JSON.stringify(data).substring(0, 200));
     return data;
   } catch (error) {
     console.error('Error fetching PCGS coin facts:', error);
@@ -270,31 +279,37 @@ export async function getPCGSPriceHistory(
 ): Promise<PCGSPriceHistory[]> {
   try {
     if (!PCGS_API_KEY) {
+      console.warn('PCGS API key not configured for price history');
       return [];
     }
 
-    const gradeMatch = grade.match(/MS(\d+)|AU(\d+)|XF(\d+)/i);
-    const gradeNum = gradeMatch ? parseInt(gradeMatch[1] || gradeMatch[2] || gradeMatch[3] || '0') : 0;
+    const gradeMatch = grade.match(/MS(\d+)|AU(\d+)|XF(\d+)|PR(\d+)/i);
+    const gradeNum = gradeMatch ? parseInt(gradeMatch[1] || gradeMatch[2] || gradeMatch[3] || gradeMatch[4] || '0') : 0;
 
     // Build query parameters
     let url = `${PCGS_API_BASE_URL}/coindetail/GetPriceHistory?PCGSNo=${pcgsNo}&GradeNo=${gradeNum}`;
     if (startDate) url += `&StartDate=${startDate}`;
     if (endDate) url += `&EndDate=${endDate}`;
 
+    console.log('PCGS price history request:', url);
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${PCGS_API_KEY}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     });
 
     if (!response.ok) {
-      console.warn('PCGS price history API error');
+      const errorText = await response.text();
+      console.warn('PCGS price history API error:', response.status, errorText);
       return [];
     }
 
     const data = await response.json();
+    console.log('PCGS price history results:', data?.length || 0, 'entries');
     return data || [];
   } catch (error) {
     console.error('Error fetching PCGS price history:', error);
@@ -313,29 +328,33 @@ export async function getPCGSPopulationHistory(
 ): Promise<PCGSPopulationHistory[]> {
   try {
     if (!PCGS_API_KEY) {
+      console.warn('PCGS API key not configured for population history');
       return [];
     }
 
-    const gradeMatch = grade.match(/MS(\d+)|AU(\d+)/i);
-    const gradeNum = gradeMatch ? parseInt(gradeMatch[1] || gradeMatch[2] || '0') : 0;
+    const gradeMatch = grade.match(/MS(\d+)|AU(\d+)|PR(\d+)/i);
+    const gradeNum = gradeMatch ? parseInt(gradeMatch[1] || gradeMatch[2] || gradeMatch[3] || '0') : 0;
 
-    const response = await fetch(
-      `${PCGS_API_BASE_URL}/coindetail/GetPopulationHistory?PCGSNo=${pcgsNo}&GradeNo=${gradeNum}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${PCGS_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const url = `${PCGS_API_BASE_URL}/coindetail/GetPopulationHistory?PCGSNo=${pcgsNo}&GradeNo=${gradeNum}`;
+    console.log('PCGS population history request:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${PCGS_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
 
     if (!response.ok) {
-      console.warn('PCGS population history API error');
+      const errorText = await response.text();
+      console.warn('PCGS population history API error:', response.status, errorText);
       return [];
     }
 
     const data = await response.json();
+    console.log('PCGS population history results:', data?.length || 0, 'entries');
     return data || [];
   } catch (error) {
     console.error('Error fetching PCGS population history:', error);
@@ -367,22 +386,31 @@ export async function getPCGSMarketValue(
  */
 export async function searchPCGSDatabase(query: string): Promise<any[]> {
   try {
-    const response = await fetch(
-      `${PCGS_API_BASE_URL}/coins/search?q=${encodeURIComponent(query)}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${PCGS_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    if (!PCGS_API_KEY) {
+      console.warn('PCGS API key not configured');
+      return [];
+    }
+
+    const url = `${PCGS_API_BASE_URL}/coins/search?q=${encodeURIComponent(query)}`;
+    console.log('PCGS search request:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${PCGS_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('PCGS search error:', response.status, errorText);
       return [];
     }
 
     const data = await response.json();
+    console.log('PCGS search results:', data?.length || 0, 'matches');
     return data;
   } catch (error) {
     console.error('Error searching PCGS database:', error);

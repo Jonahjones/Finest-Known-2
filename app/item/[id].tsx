@@ -126,10 +126,12 @@ export default function ItemDetailScreen() {
   const [loading, setLoading] = React.useState(true);
   const [isInWishlistState, setIsInWishlistState] = React.useState(false);
   
-  // PCGS Verification
-  const { verification: pcgsVerification, coinData, loading: pcgsLoadingRaw } = usePCGSVerification(
+  // PCGS Verification - pass product title and year for API search
+  const { verification: pcgsVerification, coinData, loading: pcgsLoadingRaw, error: pcgsError } = usePCGSVerification(
     product?.cert_number || null,
-    product?.grade || null
+    product?.grade || null,
+    product?.title,
+    product?.year
   );
   // Ensure boolean type to prevent Java casting errors
   const pcgsLoading = Boolean(pcgsLoadingRaw);
