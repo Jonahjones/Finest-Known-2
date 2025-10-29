@@ -46,6 +46,22 @@ function PCGSMarketDataComponent({
     );
   };
 
+  // Extract auction record from CoinFactsNotes
+  const extractAuctionRecord = (notes: string): string | null => {
+    if (!notes) return null;
+    const match = notes.match(/\$[\d,]+,\d+/);
+    if (match) {
+      const priceMatch = notes.match(/sold for (\$[\d,]+,\d+)/i);
+      const dateMatch = notes.match(/May \d+, \d{4}|on (\d{2}-\d{2}-\d{4})/i);
+      if (priceMatch) {
+        return `${priceMatch[1]}${dateMatch ? ' • ' + dateMatch[0] : ''}`;
+      }
+    }
+    return null;
+  };
+
+  const auctionRecord = extractAuctionRecord(coinData.CoinFactsNotes);
+  
   return (
     <View style={[styles.pcgsDataCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
       <View style={styles.sectionHeader}>
@@ -55,9 +71,33 @@ function PCGSMarketDataComponent({
         </Text>
       </View>
 
-      {/* PCGS Number */}
+      {/* Coin Name & Basic Info */}
+      {coinData.Name && (
+        <InfoRow label="Name" value={coinData.Name} />
+      )}
+
       {coinData.PCGSNo && (
         <InfoRow label="PCGS #" value={coinData.PCGSNo} />
+      )}
+
+      {coinData.Year && (
+        <InfoRow label="Year" value={coinData.Year} />
+      )}
+
+      {coinData.Denomination && (
+        <InfoRow label="Denomination" value={coinData.Denomination} />
+      )}
+
+      {coinData.SeriesName && (
+        <InfoRow label="Series" value={coinData.SeriesName} />
+      )}
+
+      {coinData.Category && (
+        <InfoRow label="Category" value={coinData.Category} />
+      )}
+
+      {coinData.Country && (
+        <InfoRow label="Country" value={coinData.Country} />
       )}
 
       {/* Designer */}
@@ -67,11 +107,11 @@ function PCGSMarketDataComponent({
 
       {/* Physical Specifications */}
       {coinData.Diameter && (
-        <InfoRow label="Diameter" value={coinData.Diameter} />
+        <InfoRow label="Diameter" value={`${coinData.Diameter} millimeters`} />
       )}
       
       {coinData.Weight && (
-        <InfoRow label="Weight" value={coinData.Weight} />
+        <InfoRow label="Weight" value={`${coinData.Weight} grams`} />
       )}
 
       {coinData.Edge && (
@@ -83,31 +123,57 @@ function PCGSMarketDataComponent({
       )}
 
       {/* Mintage Information */}
-      {coinData.TotalProduced && (
-        <InfoRow label="Mintage" value={coinData.TotalProduced} />
+      {coinData.Mintage && (
+        <InfoRow label="Mintage" value={coinData.Mintage.toLocaleString()} />
       )}
 
-      {coinData.Mint && (
-        <InfoRow label="Mint" value={coinData.Mint} />
+      {coinData.MintLocation && (
+        <InfoRow label="Mint" value={`${coinData.MintLocation}${coinData.MintMark ? ` (${coinData.MintMark})` : ''}`} />
       )}
 
-      {/* Auction Record */}
-      {coinData.AuctionRecord && (
-        <View style={styles.auctionRecord}>
-          <Text style={[styles.infoLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Auction Record:</Text>
-          <Text style={[styles.auctionValue, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
-            {coinData.AuctionRecord}
+      {/* Population Data */}
+      {(coinData.Population > 0 || coinData.PopHigher > 0) && (
+        <View style={styles.populationSection}>
+          <Text style={[styles.infoLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Population Data:</Text>
+          <View style={styles.populationRow}>
+            <View style={styles.populationBox}>
+              <Text style={[styles.popLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>This Grade</Text>
+              <Text style={[styles.popValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>{coinData.Population || 0}</Text>
+            </View>
+            <View style={styles.populationBox}>
+              <Text style={[styles.popLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Higher</Text>
+              <Text style={[styles.popValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>{coinData.PopHigher || 0}</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Price Guide */}
+      {coinData.PriceGuideValue > 0 && (
+        <View style={styles.priceGuideSection}>
+          <Text style={[styles.infoLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Price Guide:</Text>
+          <Text style={[styles.priceGuideValue, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
+            ${coinData.PriceGuideValue.toLocaleString()}
           </Text>
         </View>
       )}
 
-      {/* Additional Notes */}
-      {coinData.Notes && (
-        <View style={styles.notesContainer}>
-          <Text style={[styles.infoLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Notes:</Text>
-          <Text style={[styles.notesText, isLuxeTheme ? { color: tokens.colors.text } : null]}>
-            {coinData.Notes}
+      {/* Auction Record */}
+      {auctionRecord && (
+        <View style={styles.auctionRecord}>
+          <Text style={[styles.infoLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Auction Record:</Text>
+          <Text style={[styles.auctionValue, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
+            {auctionRecord}
           </Text>
+        </View>
+      )}
+
+      {/* PCGS CoinFacts Link */}
+      {coinData.CoinFactsLink && (
+        <View style={styles.linkSection}>
+          <Text style={[styles.linkText, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
+            🔗 {coinData.CoinFactsLink}
+            </Text>
         </View>
       )}
     </View>
@@ -687,5 +753,56 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: '#374151',
     marginTop: 4,
+  },
+  populationSection: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  populationRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  populationBox: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  popLabel: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  popValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  priceGuideSection: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  priceGuideValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#D97706',
+    marginTop: 4,
+  },
+  linkSection: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  linkText: {
+    fontSize: 14,
+    color: '#3B82F6',
+    fontWeight: '500',
   },
 });
