@@ -72,32 +72,51 @@ export default function WishlistScreen() {
   const renderWishlistItem = ({ item }: { item: any }) => {
     const imageUrl = item.product?.primary_image_url || item.product?.image_url;
     
+    const handleProductPress = () => {
+      router.push(`/item/${item.product_id}`);
+    };
+    
     return (
       <Card style={styles.wishlistItem}>
-        <View style={styles.itemImage}>
-          {imageUrl ? (
-            <Image 
-              source={{ uri: imageUrl }}
-              style={styles.productImage}
-              defaultSource={require('../assets/icon.png')}
-            />
-          ) : (
-            <View style={styles.imagePlaceholder}>
-              <Ionicons name="image" size={32} color={colors.text.tertiary} />
+        <View style={styles.itemTopRow}>
+          <TouchableOpacity 
+            style={styles.productContent}
+            onPress={handleProductPress}
+            activeOpacity={0.7}
+          >
+            <View style={styles.itemImage}>
+              {imageUrl ? (
+                <Image 
+                  source={{ uri: imageUrl }}
+                  style={styles.productImage}
+                  defaultSource={require('../assets/icon.png')}
+                />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Ionicons name="image" size={32} color={colors.text.tertiary} />
+                </View>
+              )}
             </View>
-          )}
-        </View>
-        
-        <View style={styles.itemDetails}>
-          <Text style={styles.itemTitle} numberOfLines={2}>
-            {item.product?.title || 'Product'}
-          </Text>
-          <Text style={styles.itemPrice}>
-            {formatPrice(item.product?.retail_price_cents || 0)}
-          </Text>
-          <Text style={styles.itemMetal}>
-            {item.product?.metal_type || 'Unknown'}
-          </Text>
+            
+            <View style={styles.itemDetails}>
+              <Text style={styles.itemTitle} numberOfLines={2}>
+                {item.product?.title || 'Product'}
+              </Text>
+              <Text style={styles.itemPrice}>
+                {formatPrice(item.product?.retail_price_cents || 0)}
+              </Text>
+              <Text style={styles.itemMetal}>
+                {item.product?.metal_type || 'Unknown'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => handleRemoveFromWishlist(item.product_id, item.product?.title)}
+          >
+            <Ionicons name="trash-outline" size={20} color={colors.error} />
+          </TouchableOpacity>
         </View>
         
         <View style={styles.itemActions}>
@@ -115,13 +134,6 @@ export default function WishlistScreen() {
           >
             <Ionicons name="cart-outline" size={20} color={colors.primary} />
             <Text style={styles.actionButtonText}>Add to Cart</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => handleRemoveFromWishlist(item.product_id, item.product?.title)}
-          >
-            <Ionicons name="trash-outline" size={20} color={colors.error} />
           </TouchableOpacity>
         </View>
       </Card>
@@ -208,14 +220,24 @@ const styles = StyleSheet.create({
   },
   
   wishlistItem: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     marginBottom: spacing.md,
     padding: spacing.md,
   },
   
+  itemTopRow: {
+    flexDirection: 'row',
+    marginBottom: spacing.md,
+  },
+  
+  productContent: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  
   itemImage: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
     marginRight: spacing.md,
   },
   
@@ -267,8 +289,7 @@ const styles = StyleSheet.create({
   itemActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   
   buyNowButton: {
@@ -296,17 +317,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     padding: spacing.sm,
     borderRadius: 8,
+    gap: spacing.xs,
   },
   
   actionButtonText: {
     fontSize: typography.caption.fontSize,
     color: colors.primary,
     fontWeight: '600',
-    marginLeft: spacing.xs,
   },
   
   removeButton: {
-    padding: spacing.sm,
+    padding: spacing.xs,
     alignItems: 'center',
     justifyContent: 'center',
   },
