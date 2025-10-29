@@ -170,11 +170,11 @@ export function extractPCGSNumber(certNumber: string): number | null {
 }
 
 /**
- * Get coin data by PCGS certification/holder number
- * Uses the CertVerification endpoint to lookup by holder serial number
+ * Get coin data by PCGS number and grade
+ * Uses the GetCoinFactsByGrade endpoint as documented in PCGS API docs
  */
 export async function getPCGSCoinFacts(
-  certNumber: number,
+  pcgsNo: number,
   grade: string,
   plusGrade: boolean = false
 ): Promise<PCGSCoinFacts | null> {
@@ -185,16 +185,21 @@ export async function getPCGSCoinFacts(
       return null;
     }
 
-    // Use CertVerification endpoint to lookup by holder number
-    const url = `${PCGS_API_BASE_URL}/certverification/SearchByCertNumber?CertNumber=${certNumber}`;
-    console.log('PCGS API request (CertVerification):', url);
+    // Extract numeric grade from string (e.g., "MS70" -> 70)
+    let gradeNum = 0;
+    const gradeMatch = grade.match(/MS(\d+)|AU(\d+)|XF(\d+)|VF(\d+)|F(\d+)|VG(\d+)|G(\d+)|P(\d+)|PR(\d+)/i);
+    if (gradeMatch) {
+      gradeNum = parseInt(gradeMatch[1] || gradeMatch[2] || gradeMatch[3] || gradeMatch[4] || gradeMatch[5] || gradeMatch[6] || gradeMatch[7] || gradeMatch[8] || gradeMatch[9] || '0');
+    }
+
+    // Use the documented endpoint format
+    const url = `${PCGS_API_BASE_URL}/coindetail/GetCoinFactsByGrade?PCGSNo=${pcgsNo}&GradeNo=${gradeNum}&PlusGrade=${plusGrade}`;
+    console.log('PCGS API request:', url);
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'authorization': `bearer ${token}`,  // lowercase "bearer" as per docs
       },
     });
 
@@ -207,24 +212,7 @@ export async function getPCGSCoinFacts(
     const data = await response.json();
     console.log('PCGS API response:', JSON.stringify(data).substring(0, 300));
     
-    // Transform the CertVerification response to match our PCGSCoinFacts interface
-    if (data) {
-      return {
-        PCGSNo: data.PCGSNo || 0,
-        Grade: data.Grade || grade,
-        Designation: data.Designation,
-        Variety: data.Variety,
-        Population: data.TotalPopulation,
-        PopulationHigher: data.PopulationHigher,
-        PriceGuideInfo: data.PriceGuide ? {
-          Price: data.PriceGuide.Value,
-          Bid: data.PriceGuide.Bid,
-          Ask: data.PriceGuide.Ask,
-        } : undefined,
-      };
-    }
-    
-    return null;
+    return data;
   } catch (error) {
     console.error('Error fetching PCGS coin data:', error);
     return null;
@@ -373,9 +361,7 @@ export async function getPCGSPriceHistory(
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'authorization': `bearer ${token}`,
       },
     });
 
@@ -419,9 +405,7 @@ export async function getPCGSPopulationHistory(
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'authorization': `bearer ${token}`,
       },
     });
 
