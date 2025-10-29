@@ -50,6 +50,9 @@ function PCGSMarketDataComponent({
     return isNaN(parsed) ? 0 : parsed;
   };
 
+  // Debug logging
+  console.log('PCGSMarketDataComponent received coinData:', JSON.stringify(coinData, null, 2));
+  
   // Pre-compute all values to avoid inline arithmetic
   const population = safePopulationValue(coinData.Population);
   const populationHigher = safePopulationValue(coinData.PopulationHigher);
@@ -63,6 +66,8 @@ function PCGSMarketDataComponent({
   const priceDisplay = priceValue > 0 ? `$${(priceValue / 100).toFixed(2)}` : '$0.00';
   const bidDisplay = bidValue > 0 ? `$${(bidValue / 100).toFixed(2)}` : '$0.00';
   const askDisplay = askValue > 0 ? `$${(askValue / 100).toFixed(2)}` : '$0.00';
+  
+  console.log('Parsed values:', { population, populationHigher, priceValue, bidValue, askValue });
   
   return (
     <View style={[styles.pcgsDataCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
