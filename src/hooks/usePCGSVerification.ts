@@ -23,47 +23,19 @@ export function usePCGSVerification(certNumber: string | null, grade: string | n
         setVerification(result);
 
         if (result?.verified) {
-          const pcgsNumber = result.pcgs_no;
-
-          // Fetch real PCGS market data using authenticated API
-          if (pcgsNumber && pcgsNumber > 0) {
-            try {
-              console.log(`Fetching PCGS market data for holder #${pcgsNumber}, Grade: ${grade}`);
-              
-              const coinFacts = await getPCGSCoinFacts(pcgsNumber, grade);
-              
-              if (coinFacts) {
-                console.log('Successfully fetched PCGS coin facts');
-                
-                // Fetch additional historical data in parallel
-                const [priceHistory, populationHistory] = await Promise.all([
-                  getPCGSPriceHistory(coinFacts.PCGSNo, grade).catch(err => {
-                    console.warn('Could not fetch price history:', err);
-                    return [];
-                  }),
-                  getPCGSPopulationHistory(coinFacts.PCGSNo, grade).catch(err => {
-                    console.warn('Could not fetch population history:', err);
-                    return [];
-                  })
-                ]);
-                
-                const fullCoinData: PCGSCoinFacts = {
-                  ...coinFacts,
-                  PriceHistory: priceHistory.length > 0 ? priceHistory : undefined,
-                  PopulationHistory: populationHistory.length > 0 ? populationHistory : undefined,
-                };
-                
-                setCoinData(fullCoinData);
-                console.log('PCGS market data loaded successfully');
-              } else {
-                console.log('PCGS API returned no data for this coin');
-              }
-            } catch (dataError) {
-              console.error('Error fetching PCGS data:', dataError);
-            }
-          } else {
-            console.log('Product has custom certification - PCGS market data requires a valid holder number');
-          }
+          // PCGS API market data is disabled
+          // Authentication works, but the correct API endpoint paths are not publicly documented
+          // The endpoints we tried (/certverification/SearchByCertNumber) return 404
+          // 
+          // To enable market data, you would need to:
+          // 1. Contact PCGS support directly for their API documentation
+          // 2. Request the correct endpoint paths for:
+          //    - Looking up coins by holder/cert number
+          //    - Getting population data
+          //    - Getting price guide data
+          //
+          // For now, the app shows PCGS certification badges correctly
+          console.log(`PCGS Certification verified for holder #${result.pcgs_no || certNumber}`);
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to verify PCGS certification';
