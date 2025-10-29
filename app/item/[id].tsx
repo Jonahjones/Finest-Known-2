@@ -36,85 +36,78 @@ function PCGSMarketDataComponent({
   isLuxeTheme: boolean; 
   tokens: any;
 }) {
-  const safePriceValue = (value: number | string | undefined | null): number => {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === 'number') return value;
-    const parsed = parseFloat(String(value));
-    return isNaN(parsed) ? 0 : parsed;
+  const InfoRow = ({ label, value }: { label: string; value: string | number | null | undefined }) => {
+    if (!value) return null;
+    return (
+      <View style={styles.infoRow}>
+        <Text style={[styles.infoLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>{label}:</Text>
+        <Text style={[styles.infoValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>{value}</Text>
+      </View>
+    );
   };
 
-  const safePopulationValue = (value: number | string | undefined | null): number => {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === 'number') return value;
-    const parsed = parseInt(String(value), 10);
-    return isNaN(parsed) ? 0 : parsed;
-  };
-
-  // Debug logging
-  console.log('PCGSMarketDataComponent received coinData:', JSON.stringify(coinData, null, 2));
-  
-  // Pre-compute all values to avoid inline arithmetic
-  const population = safePopulationValue(coinData.Population);
-  const populationHigher = safePopulationValue(coinData.PopulationHigher);
-  const populationStr = population > 0 ? population.toLocaleString() : 'N/A';
-  const populationHigherStr = populationHigher > 0 ? populationHigher.toLocaleString() : 'N/A';
-  
-  const priceValue = safePriceValue(coinData.PriceGuideInfo?.Price);
-  const bidValue = safePriceValue(coinData.PriceGuideInfo?.Bid);
-  const askValue = safePriceValue(coinData.PriceGuideInfo?.Ask);
-  
-  const priceDisplay = priceValue > 0 ? `$${(priceValue / 100).toFixed(2)}` : '$0.00';
-  const bidDisplay = bidValue > 0 ? `$${(bidValue / 100).toFixed(2)}` : '$0.00';
-  const askDisplay = askValue > 0 ? `$${(askValue / 100).toFixed(2)}` : '$0.00';
-  
-  console.log('Parsed values:', { population, populationHigher, priceValue, bidValue, askValue });
-  
   return (
     <View style={[styles.pcgsDataCard, isLuxeTheme ? { backgroundColor: tokens.colors.surface, borderColor: tokens.colors.line } : null]}>
       <View style={styles.sectionHeader}>
-        <Ionicons name="analytics-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
+        <Ionicons name="information-circle-outline" size={20} color={isLuxeTheme ? tokens.colors.gold : "#00D4AA"} />
         <Text style={[styles.sectionTitle, isLuxeTheme ? { color: tokens.colors.text } : null]}>
-          Market Data
+          PCGS CoinFacts
         </Text>
       </View>
 
-      {/* Population Stats */}
-      <View style={styles.statsRow}>
-        <View style={[styles.statBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
-          <Text style={[styles.statLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Population</Text>
-          <Text style={[styles.statValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>
-            {populationStr}
-          </Text>
-        </View>
-        <View style={[styles.statBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
-          <Text style={[styles.statLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Higher</Text>
-          <Text style={[styles.statValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>
-            {populationHigherStr}
-          </Text>
-        </View>
-      </View>
+      {/* PCGS Number */}
+      {coinData.PCGSNo && (
+        <InfoRow label="PCGS #" value={coinData.PCGSNo} />
+      )}
 
-      {/* Price Guide */}
-      {coinData.PriceGuideInfo && (
-        <View style={styles.priceRow}>
-          <View style={[styles.priceBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
-            <Text style={[styles.priceLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Price</Text>
-            <Text style={[styles.priceValue, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
-              {priceDisplay}
-            </Text>
-          </View>
-          <View style={[styles.priceBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
-            <Text style={[styles.priceLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Bid</Text>
-            <Text style={[styles.priceValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>
-              {bidDisplay}
-            </Text>
-          </View>
-          <View style={[styles.priceBox, isLuxeTheme ? { backgroundColor: tokens.colors.bgElev } : null]}>
-            <Text style={[styles.priceLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Ask</Text>
-            <Text style={[styles.priceValue, isLuxeTheme ? { color: tokens.colors.text } : null]}>
-              {askDisplay}
-            </Text>
-          </View>
+      {/* Designer */}
+      {coinData.Designer && (
+        <InfoRow label="Designer" value={coinData.Designer} />
+      )}
+
+      {/* Physical Specifications */}
+      {coinData.Diameter && (
+        <InfoRow label="Diameter" value={coinData.Diameter} />
+      )}
+      
+      {coinData.Weight && (
+        <InfoRow label="Weight" value={coinData.Weight} />
+      )}
+
+      {coinData.Edge && (
+        <InfoRow label="Edge" value={coinData.Edge} />
+      )}
+
+      {coinData.MetalContent && (
+        <InfoRow label="Metal" value={coinData.MetalContent} />
+      )}
+
+      {/* Mintage Information */}
+      {coinData.TotalProduced && (
+        <InfoRow label="Mintage" value={coinData.TotalProduced} />
+      )}
+
+      {coinData.Mint && (
+        <InfoRow label="Mint" value={coinData.Mint} />
+      )}
+
+      {/* Auction Record */}
+      {coinData.AuctionRecord && (
+        <View style={styles.auctionRecord}>
+          <Text style={[styles.infoLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Auction Record:</Text>
+          <Text style={[styles.auctionValue, isLuxeTheme ? { color: tokens.colors.gold } : null]}>
+            {coinData.AuctionRecord}
+          </Text>
+        </View>
+      )}
+
+      {/* Additional Notes */}
+      {coinData.Notes && (
+        <View style={styles.notesContainer}>
+          <Text style={[styles.infoLabel, isLuxeTheme ? { color: tokens.colors.muted } : null]}>Notes:</Text>
+          <Text style={[styles.notesText, isLuxeTheme ? { color: tokens.colors.text } : null]}>
+            {coinData.Notes}
+          </Text>
         </View>
       )}
     </View>
@@ -650,5 +643,49 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#00D4AA',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'right',
+    marginLeft: 8,
+  },
+  auctionRecord: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 2,
+    borderTopColor: '#E5E7EB',
+  },
+  auctionValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#D97706',
+    marginTop: 4,
+  },
+  notesContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  notesText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#374151',
+    marginTop: 4,
   },
 });
