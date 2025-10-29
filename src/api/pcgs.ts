@@ -3,15 +3,16 @@ import Constants from 'expo-constants';
 
 // PCGS API Configuration
 const PCGS_API_BASE_URL = 'https://api.pcgs.com/publicapi';
-const PCGS_API_KEY = Constants.expoConfig?.extra?.pcgsApiKey;
+const PCGS_USERNAME = Constants.expoConfig?.extra?.pcgsUsername;
+const PCGS_PASSWORD = Constants.expoConfig?.extra?.pcgsPassword;
 
 // Cache for access token
 let cachedAccessToken: string | null = null;
 let tokenExpiry: number = 0;
 
 /**
- * Get or refresh PCGS API access token
- * The API key from config is actually the access token for PCGS API
+ * Get or refresh PCGS API access token using OAuth2
+ * Uses username/password credentials to authenticate
  */
 async function getPCGSAccessToken(): Promise<string | null> {
   // If we have a valid cached token, return it
@@ -19,17 +20,50 @@ async function getPCGSAccessToken(): Promise<string | null> {
     return cachedAccessToken;
   }
 
-  // Use the API key directly as the access token
-  // (PCGS provides long-lived tokens)
-  if (PCGS_API_KEY) {
-    cachedAccessToken = PCGS_API_KEY;
-    // Set expiry to 1 hour from now
-    tokenExpiry = Date.now() + (60 * 60 * 1000);
-    return cachedAccessToken;
+  if (!PCGS_USERNAME || !PCGS_PASSWORD) {
+    console.warn('PCGS credentials not configured');
+    return null;
   }
 
-  console.warn('PCGS API key not configured');
-  return null;
+  try {
+    console.log('Authenticating with PCGS API...');
+    
+    // PCGS uses OAuth2 password grant
+    const response = await fetch(`${PCGS_API_BASE_URL}/authenticate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        username: PCGS_USERNAME,
+        password: PCGS_PASSWORD,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('PCGS authentication failed:', response.status, errorText.substring(0, 300));
+      return null;
+    }
+
+    const data = await response.json();
+    console.log('PCGS authentication successful!');
+    
+    if (data.access_token) {
+      cachedAccessToken = data.access_token;
+      // Set expiry based on expires_in, or default to 1 hour
+      const expiresIn = data.expires_in || 3600;
+      tokenExpiry = Date.now() + (expiresIn * 1000) - 60000; // Refresh 1 min before expiry
+      return cachedAccessToken;
+    }
+
+    console.error('No access token in response');
+    return null;
+  } catch (error) {
+    console.error('Error authenticating with PCGS:', error);
+    return null;
+  }
 }
 
 export interface PCGSPriceHistory {
@@ -84,33 +118,46 @@ export interface PCGSVerification {
 }
 
 /**
- * Authenticate with PCGS API
+ * Authenticate with PCGS API (public export for testing)
  * Returns access token for API calls
+ * Most code should use getPCGSAccessToken() which handles caching
  */
-export async function authenticatePCGS(username: string, password: string): Promise<string> {
+export async function authenticatePCGS(username?: string, password?: string): Promise<string | null> {
+  const user = username || PCGS_USERNAME;
+  const pass = password || PCGS_PASSWORD;
+  
+  if (!user || !pass) {
+    console.error('PCGS credentials not provided');
+    return null;
+  }
+
   try {
-    // PCGS uses OAuth2-like authentication
-    // You'll need to store credentials securely (use environment variables)
+    console.log('Authenticating with PCGS API...');
+    
     const response = await fetch(`${PCGS_API_BASE_URL}/authenticate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
-        username,
-        password,
+        username: user,
+        password: pass,
       }),
     });
 
     if (!response.ok) {
-      throw new Error('PCGS authentication failed');
+      const errorText = await response.text();
+      console.error('PCGS authentication failed:', response.status, errorText.substring(0, 300));
+      return null;
     }
 
     const data = await response.json();
-    return data.access_token;
+    console.log('PCGS authentication successful!');
+    return data.access_token || null;
   } catch (error) {
     console.error('Error authenticating with PCGS:', error);
-    throw error;
+    return null;
   }
 }
 

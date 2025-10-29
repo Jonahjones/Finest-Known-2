@@ -21,7 +21,8 @@ export default {
     extra: {
       supabaseUrl: "https://rhwuncdxjlzmsgiprdkz.supabase.co",
       supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJod3VuY2R4amx6bXNnaXByZGt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNDM4OTYsImV4cCI6MjA3MzcxOTg5Nn0.3jvar_teSXL2NtV7WEA3yQofFxLc_ZeewfpLyTBksAY",
-      pcgsApiKey: "zrGFFJfVW3CS-qS3Uwvh2EJgWBq7rFkQzvAKUPos9gEqnbo56H0jYemgl24wHmSWPauyLzl8irdmW4_bLWloXyApPUtIUarAxn-YY8mCqGCYmfYBGIWi1_UCcVaKI5OUU69OBFQ9QUUouqFEVQVFgqRJarUIuQ1zn8JtUQmgNRH39IJccmVN3IbxX5Dqz5eFpsznZkncGYY8uQEWfLEJGa1lzmBSWNNA8ntexkXNWRi8lGME1SmPgWpsyQrCHThWfZECO3Xj1C3nn1NKhWDwgjYlTrGN0N4PGGg2X4wZrfQvH7Mt"
+      pcgsUsername: "rjhasnoemail@gmail.com",
+      pcgsPassword: "Stacy3272!"
     }
   }
 };
