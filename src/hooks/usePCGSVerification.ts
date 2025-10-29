@@ -25,48 +25,18 @@ export function usePCGSVerification(certNumber: string | null, grade: string | n
         if (result?.verified) {
           const pcgsNumber = result.pcgs_no;
 
-          // Only fetch market data if we have a valid PCGS holder number (7-10 digits)
-          if (pcgsNumber && pcgsNumber > 0) {
-            try {
-              console.log(`Fetching PCGS market data for holder #${pcgsNumber}, Grade: ${grade}`);
-              
-              const coinFacts = await getPCGSCoinFacts(pcgsNumber, grade);
-              
-              if (coinFacts) {
-                console.log('Successfully fetched PCGS coin facts');
-                
-                // Fetch additional historical data in parallel
-                const [priceHistory, populationHistory] = await Promise.all([
-                  getPCGSPriceHistory(pcgsNumber, grade).catch(err => {
-                    console.warn('Could not fetch price history:', err);
-                    return [];
-                  }),
-                  getPCGSPopulationHistory(pcgsNumber, grade).catch(err => {
-                    console.warn('Could not fetch population history:', err);
-                    return [];
-                  })
-                ]);
-                
-                const fullCoinData: PCGSCoinFacts = {
-                  ...coinFacts,
-                  PriceHistory: priceHistory.length > 0 ? priceHistory : undefined,
-                  PopulationHistory: populationHistory.length > 0 ? populationHistory : undefined,
-                };
-                
-                setCoinData(fullCoinData);
-                console.log('PCGS market data loaded successfully');
-              } else {
-                console.warn('PCGS API returned no data for this coin');
-                // Don't set error - just no data available
-              }
-            } catch (dataError) {
-              console.error('Error fetching PCGS data:', dataError);
-              // Don't set error in state - just log it
-            }
-          } else {
-            console.log('Product has custom certification - PCGS market data requires a valid holder number');
-            // No error - just no market data available for custom certs
-          }
+          // NOTE: PCGS API calls are temporarily disabled
+          // The correct API endpoint structure is not documented in the public API
+          // We need to either:
+          // 1. Contact PCGS support to get proper endpoint documentation
+          // 2. Use a different authentication method
+          // 3. Subscribe to their API service with proper documentation
+          
+          console.log(`PCGS Certification verified for holder #${pcgsNumber || certNumber}`);
+          console.log('PCGS API market data is disabled - endpoints need verification');
+          
+          // For now, just show the certification badge without market data
+          // Market data will be added once we have correct API endpoint documentation
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to verify PCGS certification';
