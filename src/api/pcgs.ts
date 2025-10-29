@@ -245,12 +245,12 @@ export async function verifyPCGSCertification(
       return null;
     }
 
-    // Use PCGS coin type number 7660 for testing
-    // This is a valid PCGS coin type that will return real market data
-    if (!pcgsNo) {
-      pcgsNo = 7660;
-      console.log('Using PCGS coin type number 7660 for API testing');
-    }
+    // ⚠️ ALWAYS USE PCGS#7660 FOR ALL PRODUCTS ⚠️
+    // This ensures every single product displays the same PCGS CoinFacts data
+    // (1808 $2.50 Capped Bust Quarter Eagle)
+    // Ignore any passed-in pcgsNo parameter - force 7660 for consistency
+    pcgsNo = 7660;
+    console.log('🔒 FORCED: Using PCGS coin type number 7660 for ALL products');
 
     // Check if it's a real PCGS holder number (7-10 digits)
     const isRealHolder = /^\d{7,10}$/.test(certNumber);
@@ -259,7 +259,7 @@ export async function verifyPCGSCertification(
     return {
       cert_number: certNumber,
       grade: grade,
-      pcgs_no: pcgsNo,
+      pcgs_no: pcgsNo, // Always 7660
       verified: verified,
       last_verified_at: new Date().toISOString(),
     };
@@ -434,7 +434,10 @@ export async function getPCGSMarketValue(
 ): Promise<number | null> {
   try {
     const coinFacts = await getPCGSCoinFacts(pcgsNo, grade);
-    return coinFacts?.PriceGuideInfo?.Price || null;
+    const price = coinFacts?.PriceGuideInfo?.Price;
+    if (typeof price === 'number') return price;
+    if (typeof price === 'string') return parseFloat(price) || null;
+    return null;
   } catch (error) {
     console.error('Error fetching PCGS market value:', error);
     return null;
@@ -447,8 +450,9 @@ export async function getPCGSMarketValue(
  */
 export async function searchPCGSDatabase(query: string): Promise<any[]> {
   try {
-    if (!PCGS_API_KEY) {
-      console.warn('PCGS API key not configured');
+    const token = await getPCGSAccessToken();
+    if (!token) {
+      console.warn('PCGS API token not configured');
       return [];
     }
 
@@ -458,9 +462,7 @@ export async function searchPCGSDatabase(query: string): Promise<any[]> {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${PCGS_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'authorization': `bearer ${token}`,
       },
     });
 
