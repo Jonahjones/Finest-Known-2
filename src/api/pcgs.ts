@@ -210,7 +210,10 @@ export async function getPCGSCoinFacts(
     }
 
     const data = await response.json();
-    console.log('PCGS API response:', JSON.stringify(data).substring(0, 300));
+    console.log('PCGS API response:', JSON.stringify(data, null, 2));
+    console.log('Population:', data.Population, data.TotalPopulation, data.population);
+    console.log('PopulationHigher:', data.PopulationHigher, data.population_higher);
+    console.log('PriceGuideInfo:', data.PriceGuideInfo, data.PriceGuide);
     
     return data;
   } catch (error) {
