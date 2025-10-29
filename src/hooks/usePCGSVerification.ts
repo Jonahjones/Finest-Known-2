@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { verifyPCGSCertification, PCGSVerification, PCGSCoinFacts, getPCGSCoinFacts, getPCGSPriceHistory, getPCGSPopulationHistory, searchPCGSDatabase } from '../api/pcgs';
+import { verifyPCGSCertification, PCGSVerification, PCGSCoinFacts, getPCGSCoinFacts, getPCGSPriceHistory, getPCGSPopulationHistory } from '../api/pcgs';
 
-export function usePCGSVerification(certNumber: string | null, grade: string | null, productTitle?: string, productYear?: number) {
+export function usePCGSVerification(certNumber: string | null, grade: string | null) {
   const [verification, setVerification] = useState<PCGSVerification | null>(null);
   const [coinData, setCoinData] = useState<PCGSCoinFacts | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,31 +23,12 @@ export function usePCGSVerification(certNumber: string | null, grade: string | n
         setVerification(result);
 
         if (result?.verified) {
-          let pcgsNumber = result.pcgs_no;
+          const pcgsNumber = result.pcgs_no;
 
-          // If we don't have a valid PCGS number, try to find it by searching
-          if (!pcgsNumber || pcgsNumber === 0) {
-            if (productTitle) {
-              console.log(`Searching PCGS database for: ${productTitle} ${productYear || ''}`);
-              try {
-                const searchQuery = productYear ? `${productTitle} ${productYear}` : productTitle;
-                const searchResults = await searchPCGSDatabase(searchQuery);
-                
-                if (searchResults && searchResults.length > 0) {
-                  // Use the first match
-                  pcgsNumber = searchResults[0].PCGSNo || searchResults[0].pcgs_no;
-                  console.log(`Found PCGS number from search: ${pcgsNumber}`);
-                }
-              } catch (searchError) {
-                console.warn('Could not search PCGS database:', searchError);
-              }
-            }
-          }
-
-          // Fetch real PCGS market data
+          // Only fetch market data if we have a valid PCGS holder number (7-10 digits)
           if (pcgsNumber && pcgsNumber > 0) {
             try {
-              console.log(`Fetching PCGS data for PCGS#${pcgsNumber}, Grade: ${grade}`);
+              console.log(`Fetching PCGS market data for holder #${pcgsNumber}, Grade: ${grade}`);
               
               const coinFacts = await getPCGSCoinFacts(pcgsNumber, grade);
               
@@ -75,16 +56,16 @@ export function usePCGSVerification(certNumber: string | null, grade: string | n
                 setCoinData(fullCoinData);
                 console.log('PCGS market data loaded successfully');
               } else {
-                console.warn('PCGS API returned no data');
-                setError('Unable to fetch PCGS market data');
+                console.warn('PCGS API returned no data for this coin');
+                // Don't set error - just no data available
               }
             } catch (dataError) {
               console.error('Error fetching PCGS data:', dataError);
-              setError('Failed to fetch PCGS market data');
+              // Don't set error in state - just log it
             }
           } else {
-            console.warn('No valid PCGS number available for market data lookup');
-            setError('PCGS number not available for this product');
+            console.log('Product has custom certification - PCGS market data requires a valid holder number');
+            // No error - just no market data available for custom certs
           }
         }
       } catch (err) {
@@ -97,7 +78,7 @@ export function usePCGSVerification(certNumber: string | null, grade: string | n
     };
 
     fetchVerification();
-  }, [certNumber, grade, productTitle, productYear]);
+  }, [certNumber, grade]);
 
   return { verification, coinData, loading, error };
 }
