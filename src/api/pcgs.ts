@@ -5,6 +5,33 @@ import Constants from 'expo-constants';
 const PCGS_API_BASE_URL = 'https://api.pcgs.com/publicapi';
 const PCGS_API_KEY = Constants.expoConfig?.extra?.pcgsApiKey;
 
+// Cache for access token
+let cachedAccessToken: string | null = null;
+let tokenExpiry: number = 0;
+
+/**
+ * Get or refresh PCGS API access token
+ * The API key from config is actually the access token for PCGS API
+ */
+async function getPCGSAccessToken(): Promise<string | null> {
+  // If we have a valid cached token, return it
+  if (cachedAccessToken && Date.now() < tokenExpiry) {
+    return cachedAccessToken;
+  }
+
+  // Use the API key directly as the access token
+  // (PCGS provides long-lived tokens)
+  if (PCGS_API_KEY) {
+    cachedAccessToken = PCGS_API_KEY;
+    // Set expiry to 1 hour from now
+    tokenExpiry = Date.now() + (60 * 60 * 1000);
+    return cachedAccessToken;
+  }
+
+  console.warn('PCGS API key not configured');
+  return null;
+}
+
 export interface PCGSPriceHistory {
   date: string;
   price: number | string;
@@ -107,34 +134,30 @@ export function extractPCGSNumber(certNumber: string): number | null {
   return null;
 }
 
+/**
+ * Get coin data by PCGS certification/holder number
+ * Uses the CertVerification endpoint to lookup by holder serial number
+ */
 export async function getPCGSCoinFacts(
-  pcgsNo: number,
+  certNumber: number,
   grade: string,
   plusGrade: boolean = false
 ): Promise<PCGSCoinFacts | null> {
   try {
-    if (!PCGS_API_KEY) {
-      console.warn('PCGS API key not configured');
+    const token = await getPCGSAccessToken();
+    if (!token) {
+      console.warn('PCGS API token not available');
       return null;
     }
 
-    // Extract numeric grade from string (e.g., "MS65" -> 65, "Recovered" -> handle specially)
-    let gradeNum = 0;
-    const gradeMatch = grade.match(/MS(\d+)|AU(\d+)|XF(\d+)|VF(\d+)|F(\d+)|VG(\d+)|G(\d+)|P(\d+)|PR(\d+)/i);
-    if (gradeMatch) {
-      gradeNum = parseInt(gradeMatch[1] || gradeMatch[2] || gradeMatch[3] || gradeMatch[4] || gradeMatch[5] || gradeMatch[6] || gradeMatch[7] || gradeMatch[8] || gradeMatch[9] || '0');
-    } else if (grade.toLowerCase() === 'recovered' || grade.toLowerCase() === 'genuine') {
-      // For non-numeric grades, use a default or skip the grade parameter
-      gradeNum = 0;
-    }
-
-    const url = `${PCGS_API_BASE_URL}/coindetail/GetCoinFactsByGrade?PCGSNo=${pcgsNo}&GradeNo=${gradeNum}&PlusGrade=${plusGrade}`;
-    console.log('PCGS API request:', url);
+    // Use CertVerification endpoint to lookup by holder number
+    const url = `${PCGS_API_BASE_URL}/certverification/SearchByCertNumber?CertNumber=${certNumber}`;
+    console.log('PCGS API request (CertVerification):', url);
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${PCGS_API_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -142,15 +165,33 @@ export async function getPCGSCoinFacts(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('PCGS API error:', response.status, errorText);
+      console.error('PCGS API error:', response.status, errorText.substring(0, 500));
       return null;
     }
 
     const data = await response.json();
-    console.log('PCGS API response:', JSON.stringify(data).substring(0, 200));
-    return data;
+    console.log('PCGS API response:', JSON.stringify(data).substring(0, 300));
+    
+    // Transform the CertVerification response to match our PCGSCoinFacts interface
+    if (data) {
+      return {
+        PCGSNo: data.PCGSNo || 0,
+        Grade: data.Grade || grade,
+        Designation: data.Designation,
+        Variety: data.Variety,
+        Population: data.TotalPopulation,
+        PopulationHigher: data.PopulationHigher,
+        PriceGuideInfo: data.PriceGuide ? {
+          Price: data.PriceGuide.Value,
+          Bid: data.PriceGuide.Bid,
+          Ask: data.PriceGuide.Ask,
+        } : undefined,
+      };
+    }
+    
+    return null;
   } catch (error) {
-    console.error('Error fetching PCGS coin facts:', error);
+    console.error('Error fetching PCGS coin data:', error);
     return null;
   }
 }
@@ -278,8 +319,9 @@ export async function getPCGSPriceHistory(
   endDate?: string
 ): Promise<PCGSPriceHistory[]> {
   try {
-    if (!PCGS_API_KEY) {
-      console.warn('PCGS API key not configured for price history');
+    const token = await getPCGSAccessToken();
+    if (!token) {
+      console.warn('PCGS API token not available for price history');
       return [];
     }
 
@@ -296,7 +338,7 @@ export async function getPCGSPriceHistory(
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${PCGS_API_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -304,7 +346,7 @@ export async function getPCGSPriceHistory(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.warn('PCGS price history API error:', response.status, errorText);
+      console.warn('PCGS price history API error:', response.status, errorText.substring(0, 200));
       return [];
     }
 
@@ -327,8 +369,9 @@ export async function getPCGSPopulationHistory(
   grade: string
 ): Promise<PCGSPopulationHistory[]> {
   try {
-    if (!PCGS_API_KEY) {
-      console.warn('PCGS API key not configured for population history');
+    const token = await getPCGSAccessToken();
+    if (!token) {
+      console.warn('PCGS API token not available for population history');
       return [];
     }
 
@@ -341,7 +384,7 @@ export async function getPCGSPopulationHistory(
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${PCGS_API_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -349,7 +392,7 @@ export async function getPCGSPopulationHistory(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.warn('PCGS population history API error:', response.status, errorText);
+      console.warn('PCGS population history API error:', response.status, errorText.substring(0, 200));
       return [];
     }
 
